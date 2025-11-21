@@ -1,15 +1,30 @@
-import { useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useState, useEffect } from 'react';
+import { View, Text, TextInput, Pressable, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView, Image } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { trpc } from '@/utils/trpc';
 
 export default function AddProductScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
   const [name, setName] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [quantity, setQuantity] = useState('1');
   const [category, setCategory] = useState('');
   const [location, setLocation] = useState('');
+  const [scannedProduct, setScannedProduct] = useState<any>(null);
+
+  // Obsłuż dane ze skanera
+  useEffect(() => {
+    if (params.scannedProduct) {
+      try {
+        const product = JSON.parse(params.scannedProduct as string);
+        setScannedProduct(product);
+        setName(product.name || '');
+      } catch (error) {
+        console.error('Error parsing scanned product:', error);
+      }
+    }
+  }, [params.scannedProduct]);
 
   const utils = trpc.useUtils();
   const createMutation = trpc.products.create.useMutation({
@@ -62,6 +77,39 @@ export default function AddProductScreen() {
 
       <ScrollView style={styles.content}>
         <View style={styles.form}>
+          {scannedProduct && (
+            <View style={styles.scannedProductInfo}>
+              {scannedProduct.image && (
+                <Image
+                  source={{ uri: scannedProduct.image }}
+                  style={styles.productImage}
+                  resizeMode="contain"
+                />
+              )}
+              {scannedProduct.brand && (
+                <Text style={styles.brandText}>{scannedProduct.brand}</Text>
+              )}
+              {scannedProduct.nutrition && (
+                <View style={styles.nutritionInfo}>
+                  {scannedProduct.nutrition.calories && (
+                    <Text style={styles.nutritionText}>
+                      Calories: {scannedProduct.nutrition.calories} kcal
+                    </Text>
+                  )}
+                </View>
+              )}
+            </View>
+          )}
+
+          <View style={styles.scanButtonContainer}>
+            <Pressable
+              style={styles.scanButton}
+              onPress={() => router.push('/scan-barcode')}
+            >
+              <Text style={styles.scanButtonText}>📷 Scan Barcode</Text>
+            </Pressable>
+          </View>
+
           <Text style={styles.label}>Product Name *</Text>
           <TextInput
             style={styles.input}
@@ -252,6 +300,49 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     opacity: 0.5,
+  },
+  scannedProductInfo: {
+    backgroundColor: 'white',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  productImage: {
+    width: 150,
+    height: 150,
+    marginBottom: 12,
+  },
+  brandText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+  },
+  nutritionInfo: {
+    width: '100%',
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#e5e5e5',
+  },
+  nutritionText: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4,
+  },
+  scanButtonContainer: {
+    marginBottom: 16,
+  },
+  scanButton: {
+    backgroundColor: '#6366f1',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  scanButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

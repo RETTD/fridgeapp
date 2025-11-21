@@ -7,6 +7,7 @@ import { trpc } from '@/utils/trpc';
 import toast from 'react-hot-toast';
 import { Sidebar } from '@/components/Sidebar';
 import { HamburgerButton } from '@/components/HamburgerButton';
+import { BarcodeScanner } from '@/components/BarcodeScanner';
 import { useTranslations } from 'next-intl';
 import { useTheme } from '@/components/ThemeProvider';
 
@@ -22,6 +23,8 @@ export default function AddProductPage() {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
   const [location, setLocation] = useState('');
+  const [showScanner, setShowScanner] = useState(false);
+  const [scannedProduct, setScannedProduct] = useState<any>(null);
 
   const utils = trpc.useUtils();
   
@@ -173,6 +176,65 @@ export default function AddProductPage() {
               </h1>
             </div>
           
+          {showScanner ? (
+            <div className="mb-6">
+              <BarcodeScanner
+                onProductFound={(product) => {
+                  setScannedProduct(product);
+                  setName(product.name || '');
+                  setShowScanner(false);
+                  toast.success('Product information loaded!');
+                }}
+                onClose={() => setShowScanner(false)}
+              />
+            </div>
+          ) : (
+            <div className="mb-4">
+              <button
+                type="button"
+                onClick={() => setShowScanner(true)}
+                className="w-full bg-gradient-to-r from-fridge-primary to-fridge-secondary text-white py-3 px-6 rounded-xl hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fridge-primary transition-all font-semibold flex items-center justify-center gap-2"
+              >
+                <span>📷</span>
+                <span>Scan Barcode</span>
+              </button>
+            </div>
+          )}
+
+          {scannedProduct && (
+            <div className="mb-6 p-4 bg-fridge-light dark:bg-gray-700 rounded-xl border-2 border-fridge-primary">
+              <div className="flex items-start gap-4">
+                {scannedProduct.image && (
+                  <img
+                    src={scannedProduct.image}
+                    alt={scannedProduct.name}
+                    className="w-24 h-24 object-contain rounded-lg"
+                  />
+                )}
+                <div className="flex-1">
+                  {scannedProduct.brand && (
+                    <p className="text-sm text-muted mb-1">{scannedProduct.brand}</p>
+                  )}
+                  {scannedProduct.nutrition?.calories && (
+                    <p className="text-sm text-primary">
+                      Calories: {scannedProduct.nutrition.calories} kcal
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setScannedProduct(null);
+                    setName('');
+                  }}
+                  className="text-muted hover:text-primary transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-semibold text-primary mb-1.5">

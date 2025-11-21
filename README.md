@@ -51,6 +51,24 @@ pnpm install
 2. Przejdź do **API Keys** i utwórz nowy klucz API
 3. Skopiuj klucz API (będzie potrzebny w następnym kroku)
 
+### 4.1. Skonfiguruj MCP OpenNutrition (opcjonalne - dla informacji o kaloriach w przepisach)
+
+MCP OpenNutrition zapewnia dostęp do bazy danych z ponad 300 000 produktów spożywczych wraz z danymi odżywczymi.
+
+1. Sklonuj repozytorium MCP OpenNutrition:
+   ```bash
+   git clone https://github.com/deadletterq/mcp-opennutrition.git
+   cd mcp-opennutrition
+   ```
+
+2. Zainstaluj zależności i zbuduj projekt:
+   ```bash
+   npm install
+   npm run build
+   ```
+
+3. Skopiuj ścieżkę do zbudowanego pliku `build/index.js` (będzie potrzebna w następnym kroku)
+
 ### 5. Utwórz plik `.env` w głównym katalogu
 
 ```bash
@@ -76,9 +94,17 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 
 # OpenAI API Key (opcjonalne - dla generowania przepisów)
 OPENAI_API_KEY=your_openai_api_key
+
+# MCP OpenNutrition Configuration (opcjonalne - dla informacji o kaloriach)
+# Ścieżka do zbudowanego pliku mcp-opennutrition/build/index.js
+MCP_OPENNUTRITION_PATH=/absolute/path/to/mcp-opennutrition/build/index.js
+# Opcjonalnie: ścieżka do Node.js (domyślnie używa systemowego Node.js)
+# MCP_NODE_PATH=/usr/local/bin/node
 ```
 
-**📝 Uwaga:** `OPENAI_API_KEY` jest opcjonalne - potrzebne tylko do funkcji generowania przepisów. Możesz uzyskać klucz API na [platform.openai.com](https://platform.openai.com).
+**📝 Uwagi:**
+- `OPENAI_API_KEY` jest opcjonalne - potrzebne tylko do funkcji generowania przepisów. Możesz uzyskać klucz API na [platform.openai.com](https://platform.openai.com).
+- `MCP_OPENNUTRITION_PATH` jest opcjonalne - potrzebne tylko do wyświetlania informacji o kaloriach w przepisach. Jeśli nie jest ustawione, przepisy będą generowane bez informacji o wartościach odżywczych.
 
 ### 6. Skonfiguruj Mobile (`apps/mobile/app.json`)
 
