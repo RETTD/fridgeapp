@@ -255,3 +255,11 @@
 2025-11-21T20:12:40.946144Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("apps/web/src/components/Sidebar.tsx")}
 2025-11-21T20:12:40.946407Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Other("web"), path: AnchoredSystemPathBuf("apps/web") }}))
 2025-11-21T20:12:40.946605Z  WARN turborepo_lib::package_changes_watcher: hashes are the same, no need to rerun
+2025-11-21T20:19:53.647823Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("README.md")}
+2025-11-21T20:19:53.647868Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-11-21T20:19:53.847896Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("README.md")}
+2025-11-21T20:19:53.847921Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-11-21T20:20:00.847192Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("README.md")}
+2025-11-21T20:20:00.847210Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
+2025-11-21T20:22:53.948830Z  WARN turborepo_lib::package_changes_watcher: changed_files: {AnchoredSystemPathBuf("README.md")}
+2025-11-21T20:22:53.948877Z  WARN turborepo_lib::package_changes_watcher: changed_packages: Ok(Some({WorkspacePackage { name: Root, path: AnchoredSystemPathBuf("") }}))
