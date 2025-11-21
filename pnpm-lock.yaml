@@ -185,6 +185,9 @@ importers:
       dotenv:
         specifier: ^16.3.1
         version: 16.6.1
+      superjson:
+        specifier: ^2.2.1
+        version: 2.2.5
       zod:
         specifier: ^3.22.4
         version: 3.25.76

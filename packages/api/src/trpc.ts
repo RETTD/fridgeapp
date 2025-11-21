@@ -1,7 +1,10 @@
 import { initTRPC, TRPCError } from '@trpc/server';
+import superjson from 'superjson';
 import { Context } from './context';
 
-const t = initTRPC.context<Context>().create();
+const t = initTRPC.context<Context>().create({
+  transformer: superjson,
+});
 
 // Auth middleware
 const isAuthed = t.middleware(({ ctx, next }) => {

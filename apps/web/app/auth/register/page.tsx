@@ -59,7 +59,7 @@ export default function RegisterPage() {
                 id="name"
                 name="name"
                 type="text"
-                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all"
+                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all text-fridge-dark placeholder:text-gray-400"
                 placeholder="Your name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -75,7 +75,7 @@ export default function RegisterPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all"
+                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all text-fridge-dark placeholder:text-gray-400"
                 placeholder="your@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -92,7 +92,7 @@ export default function RegisterPage() {
                 autoComplete="new-password"
                 required
                 minLength={6}
-                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all"
+                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all text-fridge-dark placeholder:text-gray-400"
                 placeholder="•••••••• (min 6 characters)"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

@@ -32,18 +32,58 @@ export default function AddProductPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name || !expiryDate) {
-      toast.error('Please fill in all required fields');
+    // Walidacja - sprawdź czy wartości są ustawione
+    const trimmedName = name?.trim();
+    if (!trimmedName || trimmedName.length === 0) {
+      toast.error('Please enter a product name');
       return;
     }
 
-    createMutation.mutate({
-      name,
-      expiryDate: new Date(expiryDate).toISOString(),
-      quantity,
-      category: category || undefined,
-      location: location || undefined,
-    });
+    if (!expiryDate || expiryDate.length === 0) {
+      toast.error('Please select an expiry date');
+      return;
+    }
+
+    // Konwersja daty - upewnij się że jest poprawnym ISO stringiem
+    let expiryDateISO: string;
+    try {
+      const date = new Date(expiryDate);
+      if (isNaN(date.getTime())) {
+        toast.error('Invalid date format');
+        return;
+      }
+      expiryDateISO = date.toISOString();
+    } catch (error) {
+      console.error('Date conversion error:', error);
+      toast.error('Invalid date format');
+      return;
+    }
+
+    // Przygotowanie danych - upewnij się że wszystkie wymagane pola są stringami
+    const productData = {
+      name: String(trimmedName),
+      expiryDate: String(expiryDateISO),
+      quantity: Number(quantity) || 1,
+      category: category?.trim() || undefined,
+      location: location?.trim() || undefined,
+    };
+
+    // Walidacja przed wysłaniem
+    if (!productData.name || productData.name.length === 0) {
+      toast.error('Product name is required');
+      return;
+    }
+
+    if (!productData.expiryDate || productData.expiryDate.length === 0) {
+      toast.error('Expiry date is required');
+      return;
+    }
+
+    console.log('Submitting product data:', productData);
+    console.log('Name type:', typeof productData.name, 'Value:', productData.name);
+    console.log('ExpiryDate type:', typeof productData.expiryDate, 'Value:', productData.expiryDate);
+
+    createMutation.mutate(productData);
   };
 
   return (
@@ -108,7 +148,7 @@ export default function AddProductPage() {
                 type="text"
                 required
                 placeholder="e.g., Milk, Bread, Eggs"
-                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all"
+                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all text-fridge-dark placeholder:text-gray-400"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
@@ -121,7 +161,7 @@ export default function AddProductPage() {
               <input
                 type="date"
                 required
-                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all"
+                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all text-fridge-dark"
                 value={expiryDate}
                 onChange={(e) => setExpiryDate(e.target.value)}
               />
@@ -134,7 +174,7 @@ export default function AddProductPage() {
               <input
                 type="number"
                 min="1"
-                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all"
+                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all text-fridge-dark placeholder:text-gray-400"
                 value={quantity}
                 onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
               />
@@ -147,7 +187,7 @@ export default function AddProductPage() {
               <input
                 type="text"
                 placeholder="e.g., Dairy, Meat, Vegetables"
-                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all"
+                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all text-fridge-dark placeholder:text-gray-400"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
               />
@@ -158,7 +198,7 @@ export default function AddProductPage() {
                 Location
               </label>
               <select
-                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all bg-white"
+                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all bg-white text-fridge-dark"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
               >
