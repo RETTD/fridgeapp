@@ -141,7 +141,11 @@
     "deleteAccountWarning": "This action cannot be undone. This will permanently delete your account and all your data.",
     "notifications": "Notifications",
     "expiryReminderDays": "Days before expiry to send reminder",
-    "enableNotifications": "Enable email notifications"
+    "enableNotifications": "Enable email notifications",
+    "theme": "Theme",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode",
+    "selectTheme": "Choose between light and dark theme"
   }
 }
 

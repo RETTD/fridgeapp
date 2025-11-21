@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { TRPCProvider } from '@/components/TRPCProvider'
+import { ThemeProvider } from '@/components/ThemeProvider'
 import { Toaster } from 'react-hot-toast'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
@@ -24,12 +25,14 @@ export default async function RootLayout({
   const messages = await getMessages({ locale })
 
   return (
-    <html lang={locale}>
+    <html lang={locale} suppressHydrationWarning>
       <body className={inter.className}>
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <TRPCProvider>{children}</TRPCProvider>
-        </NextIntlClientProvider>
-        <Toaster position="top-right" />
+        <ThemeProvider>
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <TRPCProvider>{children}</TRPCProvider>
+          </NextIntlClientProvider>
+          <Toaster position="top-right" />
+        </ThemeProvider>
       </body>
     </html>
   )

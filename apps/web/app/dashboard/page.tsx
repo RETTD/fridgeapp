@@ -9,10 +9,12 @@ import toast from 'react-hot-toast';
 import { Sidebar } from '@/components/Sidebar';
 import { HamburgerButton } from '@/components/HamburgerButton';
 import { useTranslations } from 'next-intl';
+import { useTheme } from '@/components/ThemeProvider';
 
 export default function DashboardPage() {
   const router = useRouter();
   const t = useTranslations();
+  const { theme, toggleTheme, mounted: themeMounted } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -148,7 +150,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-fridge-ice via-white to-fridge-light flex">
+    <div className="min-h-screen bg-gradient-to-br from-fridge-ice via-white to-fridge-light dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex">
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
@@ -165,7 +167,7 @@ export default function DashboardPage() {
         </nav>
 
         {/* Top Navigation - Desktop: pełna nawigacja */}
-        <nav className="hidden lg:block bg-white/80 backdrop-blur-sm shadow-sm border-b border-fridge-cold/20 sticky top-0 z-30">
+        <nav className="hidden lg:block bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm border-b border-fridge-cold/20 dark:border-gray-700/20 sticky top-0 z-30">
           <div className="px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center space-x-4">
@@ -196,39 +198,39 @@ export default function DashboardPage() {
           {/* Statistics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             {/* Expired Products */}
-            <div className="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-300 rounded-xl p-6 shadow-lg">
+            <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30 border-2 border-red-300 dark:border-red-700 rounded-xl p-6 shadow-lg">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-3xl">⛔</span>
                 <span className="text-4xl font-bold text-red-600">
                   {stats?.expired || 0}
                 </span>
               </div>
-              <h3 className="text-lg font-semibold text-red-800">{t('dashboard.expiredProducts')}</h3>
-              <p className="text-sm text-red-700 mt-1">{t('dashboard.productsPastExpiry')}</p>
+              <h3 className="text-lg font-semibold text-red-800 dark:text-red-300">{t('dashboard.expiredProducts')}</h3>
+              <p className="text-sm text-red-700 dark:text-red-400 mt-1">{t('dashboard.productsPastExpiry')}</p>
             </div>
 
             {/* Expiring Soon */}
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-300 rounded-xl p-6 shadow-lg">
+            <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/30 border-2 border-orange-300 dark:border-orange-700 rounded-xl p-6 shadow-lg">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-3xl">⚠️</span>
                 <span className="text-4xl font-bold text-orange-600">
                   {stats?.expiringSoon || 0}
                 </span>
               </div>
-              <h3 className="text-lg font-semibold text-orange-800">{t('dashboard.expiringSoonProducts')}</h3>
-              <p className="text-sm text-orange-700 mt-1">{t('dashboard.expiresWithin3Days')}</p>
+              <h3 className="text-lg font-semibold text-orange-800 dark:text-orange-300">{t('dashboard.expiringSoonProducts')}</h3>
+              <p className="text-sm text-orange-700 dark:text-orange-400 mt-1">{t('dashboard.expiresWithin3Days')}</p>
             </div>
 
             {/* Wasted Last Month */}
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-300 rounded-xl p-6 shadow-lg">
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 border-2 border-purple-300 dark:border-purple-700 rounded-xl p-6 shadow-lg">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-3xl">💔</span>
                 <span className="text-4xl font-bold text-purple-600">
                   {stats?.wastedLastMonth || 0}
                 </span>
               </div>
-              <h3 className="text-lg font-semibold text-purple-800">{t('dashboard.wastedProducts')}</h3>
-              <p className="text-sm text-purple-700 mt-1">{t('dashboard.expiredInLast30Days')}</p>
+              <h3 className="text-lg font-semibold text-purple-800 dark:text-purple-300">{t('dashboard.wastedProducts')}</h3>
+              <p className="text-sm text-purple-700 dark:text-purple-400 mt-1">{t('dashboard.expiredInLast30Days')}</p>
             </div>
           </div>
 
@@ -288,16 +290,16 @@ export default function DashboardPage() {
               return (
                 <div
                   key={product.id}
-                  className={`bg-white rounded-xl shadow-lg hover:shadow-xl transition-all p-6 border-2 ${
+                  className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all p-6 border-2 ${
                     isExpired
-                      ? 'border-red-300 bg-red-50/50'
+                      ? 'border-red-300 dark:border-red-700 bg-red-50/50 dark:bg-red-900/20'
                       : isExpiringSoon
-                      ? 'border-orange-300 bg-orange-50/50'
-                      : 'border-fridge-cold bg-white'
+                      ? 'border-orange-300 dark:border-orange-700 bg-orange-50/50 dark:bg-orange-900/20'
+                      : 'border-fridge-cold dark:border-gray-700 bg-white dark:bg-gray-800'
                   }`}
                 >
                   <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-xl font-bold text-fridge-dark flex-1">{product.name}</h3>
+                    <h3 className="text-xl font-bold text-fridge-dark dark:text-gray-200 flex-1">{product.name}</h3>
                     {product.location && (
                       <span className="ml-2 px-2 py-1 bg-fridge-light text-fridge-dark text-xs rounded-full">
                         {product.location}
@@ -309,7 +311,7 @@ export default function DashboardPage() {
                     <div className="flex items-center space-x-2 text-sm">
                       <span className="text-fridge-dark/60">📅</span>
                       <span className={`font-medium ${
-                        isExpired ? 'text-red-600' : isExpiringSoon ? 'text-orange-600' : 'text-fridge-dark'
+                        isExpired ? 'text-red-600 dark:text-red-400' : isExpiringSoon ? 'text-orange-600 dark:text-orange-400' : 'text-fridge-dark dark:text-gray-300'
                       }`}>
                         {isExpired
                           ? `${t('products.expired')} ${Math.abs(daysUntilExpiry)} ${t('products.days')} ${t('products.ago')}`
@@ -320,14 +322,14 @@ export default function DashboardPage() {
                     </div>
 
                     {product.quantity > 1 && (
-                      <div className="flex items-center space-x-2 text-sm text-fridge-dark/70">
+                      <div className="flex items-center space-x-2 text-sm text-fridge-dark/70 dark:text-gray-400">
                         <span>📦</span>
                         <span>{t('products.quantity')}: {product.quantity}</span>
                       </div>
                     )}
 
                     {product.category && (
-                      <div className="flex items-center space-x-2 text-sm text-fridge-dark/70">
+                      <div className="flex items-center space-x-2 text-sm text-fridge-dark/70 dark:text-gray-400">
                         <span>🏷️</span>
                         <span>{product.category.icon && <span className="mr-1">{product.category.icon}</span>}{product.category.name}</span>
                       </div>

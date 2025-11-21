@@ -4,6 +4,7 @@ module.exports = {
     './app/**/*.{js,ts,jsx,tsx,mdx}',
     './src/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  darkMode: 'class', // Enable class-based dark mode
   theme: {
     extend: {
       colors: {
@@ -16,6 +17,38 @@ module.exports = {
           ice: '#F0F9FF',          // Ice white
           cold: '#BAE6FD',         // Cold blue
         },
+        // Semantic colors that automatically adapt to dark mode
+        bg: {
+          primary: 'var(--background)',
+          card: 'var(--card-bg)',
+          nav: 'var(--nav-bg)',
+          input: 'var(--input-bg)',
+        },
+        text: {
+          primary: 'var(--text-primary)',
+          secondary: 'var(--text-secondary)',
+          muted: 'var(--text-muted)',
+        },
+        border: {
+          card: 'var(--card-border)',
+          nav: 'var(--nav-border)',
+          input: 'var(--input-border)',
+        },
+      },
+      backgroundColor: {
+        'card': 'var(--card-bg)',
+        'nav': 'var(--nav-bg)',
+        'input': 'var(--input-bg)',
+      },
+      textColor: {
+        'primary': 'var(--text-primary)',
+        'secondary': 'var(--text-secondary)',
+        'muted': 'var(--text-muted)',
+      },
+      borderColor: {
+        'card': 'var(--card-border)',
+        'nav': 'var(--nav-border)',
+        'input': 'var(--input-border)',
       },
     },
   },

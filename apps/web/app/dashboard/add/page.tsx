@@ -8,9 +8,11 @@ import toast from 'react-hot-toast';
 import { Sidebar } from '@/components/Sidebar';
 import { HamburgerButton } from '@/components/HamburgerButton';
 import { useTranslations } from 'next-intl';
+import { useTheme } from '@/components/ThemeProvider';
 
 export default function AddProductPage() {
   const t = useTranslations();
+  const { theme, toggleTheme, mounted: themeMounted } = useTheme();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [name, setName] = useState('');
@@ -109,7 +111,7 @@ export default function AddProductPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-fridge-ice via-white to-fridge-light flex">
+    <div className="min-h-screen bg-gradient-to-br from-fridge-ice via-white to-fridge-light dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex">
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
@@ -126,7 +128,7 @@ export default function AddProductPage() {
         </nav>
 
         {/* Top Navigation - Desktop: pełna nawigacja */}
-        <nav className="hidden lg:block bg-white/80 backdrop-blur-sm shadow-sm border-b border-fridge-cold/20 sticky top-0 z-30">
+        <nav className="hidden lg:block bg-nav backdrop-blur-sm shadow-sm border-b border-nav sticky top-0 z-30">
           <div className="px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center space-x-4">
@@ -142,18 +144,28 @@ export default function AddProductPage() {
                   <span>{t('common.back')}</span>
                 </Link>
               </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-2xl">🧊</span>
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={toggleTheme}
+                  disabled={!themeMounted}
+                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all disabled:opacity-50"
+                  title={theme === 'dark' ? t('settings.lightMode') : t('settings.darkMode')}
+                >
+                  <span className="text-xl">{theme === 'dark' ? '🌙' : '☀️'}</span>
+                </button>
+                <div className="flex items-center space-x-2">
+                  <span className="text-2xl">🧊</span>
                   <h1 className="text-xl font-bold bg-gradient-to-r from-fridge-primary to-fridge-secondary bg-clip-text text-transparent">
-                  {t('common.appName')}
-                </h1>
+                    {t('common.appName')}
+                  </h1>
+                </div>
               </div>
             </div>
           </div>
         </nav>
 
         <main className="max-w-2xl mx-auto p-4 sm:p-6">
-          <div className="bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border-2 border-fridge-cold/30">
+          <div className="bg-card backdrop-blur-sm shadow-xl rounded-2xl p-6 border-2 border-card">
             <div className="flex items-center space-x-3 mb-4">
               <span className="text-2xl">➕</span>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-fridge-primary to-fridge-secondary bg-clip-text text-transparent">
@@ -163,53 +175,53 @@ export default function AddProductPage() {
           
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-fridge-dark mb-1.5">
+              <label className="block text-sm font-semibold text-primary mb-1.5">
                 {t('products.name')} *
               </label>
               <input
                 type="text"
                 required
                 placeholder="e.g., Milk, Bread, Eggs"
-                className="w-full px-4 py-2 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all text-fridge-dark placeholder:text-gray-400"
+                className="w-full px-4 py-2 border-2 border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all bg-input text-primary placeholder:text-muted"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-fridge-dark mb-1.5">
+              <label className="block text-sm font-semibold text-primary mb-1.5">
                 {t('products.expiryDate')} *
               </label>
               <input
                 type="date"
                 required
-                className="w-full px-4 py-2 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all text-fridge-dark"
+                className="w-full px-4 py-2 border-2 border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all bg-input text-primary"
                 value={expiryDate}
                 onChange={(e) => setExpiryDate(e.target.value)}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-fridge-dark mb-1.5">
+              <label className="block text-sm font-semibold text-primary mb-1.5">
                 {t('products.quantity')}
               </label>
               <input
                 type="number"
                 min="1"
-                className="w-full px-4 py-2 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all text-fridge-dark placeholder:text-gray-400"
+                className="w-full px-4 py-2 border-2 border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all bg-input text-primary placeholder:text-muted"
                 value={quantity}
                 onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-fridge-dark mb-1.5">
+              <label className="block text-sm font-semibold text-primary mb-1.5">
                 {t('products.category')}
               </label>
               <div className="space-y-2">
                 <div className="flex gap-2">
                   <select
-                    className="flex-1 px-4 py-2 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all bg-white text-fridge-dark"
+                    className="flex-1 px-4 py-2 border-2 border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all bg-input text-primary"
                     value={categoryId}
                     onChange={(e) => {
                       const value = e.target.value;
@@ -238,7 +250,7 @@ export default function AddProductPage() {
                     <input
                       type="text"
                       placeholder={t('products.categoryName')}
-                      className="flex-1 px-4 py-2 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all text-fridge-dark placeholder:text-gray-400"
+                      className="flex-1 px-4 py-2 border-2 border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all bg-input text-primary placeholder:text-muted"
                       value={newCategoryName}
                       onChange={(e) => setNewCategoryName(e.target.value)}
                       onKeyDown={(e) => {
@@ -269,7 +281,7 @@ export default function AddProductPage() {
                         setNewCategoryName('');
                         setCategoryId('');
                       }}
-                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all font-semibold"
+                      className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 transition-all font-semibold"
                     >
                       ✕
                     </button>
@@ -279,11 +291,11 @@ export default function AddProductPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-fridge-dark mb-1.5">
+              <label className="block text-sm font-semibold text-primary mb-1.5">
                 {t('products.location')}
               </label>
               <select
-                className="w-full px-4 py-2 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all bg-white text-fridge-dark"
+                className="w-full px-4 py-2 border-2 border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all bg-input text-primary"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
               >
@@ -305,7 +317,7 @@ export default function AddProductPage() {
               <button
                 type="button"
                 onClick={() => router.push('/dashboard')}
-                className="flex-1 bg-fridge-light text-fridge-dark py-2.5 px-6 rounded-xl hover:bg-fridge-cold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fridge-primary transition-all font-semibold"
+                className="flex-1 bg-fridge-light dark:bg-gray-700 text-primary py-2.5 px-6 rounded-xl hover:bg-fridge-cold dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fridge-primary transition-all font-semibold"
               >
                 {t('common.cancel')}
               </button>

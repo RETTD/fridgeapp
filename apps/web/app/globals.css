@@ -5,13 +5,29 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --card-border: rgba(186, 230, 253, 0.3);
+  --text-primary: #0C4A6E;
+  --text-secondary: rgba(12, 74, 110, 0.7);
+  --text-muted: #6b7280;
+  --input-bg: #ffffff;
+  --input-border: #BAE6FD;
+  --nav-bg: rgba(255, 255, 255, 0.8);
+  --nav-border: rgba(186, 230, 253, 0.2);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --background: #111827;
+  --foreground: #f3f4f6;
+  --card-bg: rgba(31, 41, 55, 0.9);
+  --card-border: rgba(75, 85, 99, 0.3);
+  --text-primary: #e5e7eb;
+  --text-secondary: rgba(229, 231, 235, 0.7);
+  --text-muted: #9ca3af;
+  --input-bg: #374151;
+  --input-border: #4b5563;
+  --nav-bg: rgba(31, 41, 55, 0.8);
+  --nav-border: rgba(75, 85, 99, 0.2);
 }
 
 body {
@@ -32,6 +48,10 @@ html {
 
 ::-webkit-scrollbar-track {
   background: #f1f1f1;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #374151;
 }
 
 ::-webkit-scrollbar-thumb {

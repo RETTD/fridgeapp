@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { supabase } from '@/utils/supabase';
 import { useTranslations } from 'next-intl';
+import { useTheme } from '@/components/ThemeProvider';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const t = useTranslations();
+  const { theme, toggleTheme, mounted: themeMounted } = useTheme();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -75,16 +77,37 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             })}
           </nav>
 
-          {/* Logout Button */}
-              <div className="p-4 border-t border-white/20">
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-all"
-                >
-                  <span className="text-xl">🚪</span>
-                  <span>{t('auth.logout')}</span>
-                </button>
+          {/* Theme Toggle */}
+          <div className="p-4 border-t border-white/20">
+            <button
+              onClick={toggleTheme}
+              disabled={!themeMounted}
+              className="w-full flex items-center justify-between px-4 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-all disabled:opacity-50"
+            >
+              <div className="flex items-center space-x-3">
+                <span className="text-xl">{theme === 'dark' ? '🌙' : '☀️'}</span>
+                <span>{theme === 'dark' ? t('settings.darkMode') : t('settings.lightMode')}</span>
               </div>
+              <div className="relative inline-flex h-5 w-9 items-center rounded-full bg-white/20 transition-colors">
+                <span
+                  className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                    theme === 'dark' ? 'translate-x-5' : 'translate-x-1'
+                  }`}
+                />
+              </div>
+            </button>
+          </div>
+
+          {/* Logout Button */}
+          <div className="p-4 border-t border-white/20">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-all"
+            >
+              <span className="text-xl">🚪</span>
+              <span>{t('auth.logout')}</span>
+            </button>
+          </div>
         </div>
       </div>
     </>

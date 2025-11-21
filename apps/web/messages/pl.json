@@ -141,7 +141,11 @@
     "deleteAccountWarning": "Ta akcja nie może być cofnięta. To trwale usunie Twoje konto i wszystkie dane.",
     "notifications": "Powiadomienia",
     "expiryReminderDays": "Dni przed wygaśnięciem do wysłania przypomnienia",
-    "enableNotifications": "Włącz powiadomienia email"
+    "enableNotifications": "Włącz powiadomienia email",
+    "theme": "Motyw",
+    "lightMode": "Tryb jasny",
+    "darkMode": "Tryb ciemny",
+    "selectTheme": "Wybierz między jasnym a ciemnym motywem"
   }
 }
 

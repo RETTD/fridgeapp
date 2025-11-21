@@ -10,11 +10,13 @@ import { HamburgerButton } from '@/components/HamburgerButton';
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
 import { supabase } from '@/utils/supabase';
+import { useTheme } from '@/components/ThemeProvider';
 
 export default function SettingsPage() {
   const router = useRouter();
   const t = useTranslations();
   const locale = useLocale();
+  const { theme, toggleTheme, mounted: themeMounted } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Language state
@@ -105,7 +107,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-fridge-ice via-white to-fridge-light flex">
+    <div className="min-h-screen bg-gradient-to-br from-fridge-ice via-white to-fridge-light dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-0'}`}>
@@ -120,7 +122,7 @@ export default function SettingsPage() {
         </nav>
 
         {/* Desktop Navigation */}
-        <nav className="hidden lg:block bg-white/80 backdrop-blur-sm shadow-sm border-b border-fridge-cold/20 sticky top-0 z-30">
+        <nav className="hidden lg:block bg-nav backdrop-blur-sm shadow-sm border-b border-nav sticky top-0 z-30">
           <div className="px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center space-x-4">
@@ -136,12 +138,22 @@ export default function SettingsPage() {
                   <span>{t('common.back')}</span>
                 </Link>
               </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-2xl">🧊</span>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-fridge-primary to-fridge-secondary bg-clip-text text-transparent">
-                  {t('common.appName')}
-                </h1>
-              </div>
+                  <div className="flex items-center space-x-4">
+                    <button
+                      onClick={toggleTheme}
+                      disabled={!themeMounted}
+                      className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all disabled:opacity-50"
+                      title={theme === 'dark' ? t('settings.lightMode') : t('settings.darkMode')}
+                    >
+                      <span className="text-xl">{theme === 'dark' ? '🌙' : '☀️'}</span>
+                    </button>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-2xl">🧊</span>
+                      <h1 className="text-xl font-bold bg-gradient-to-r from-fridge-primary to-fridge-secondary bg-clip-text text-transparent">
+                        {t('common.appName')}
+                      </h1>
+                    </div>
+                  </div>
             </div>
           </div>
         </nav>
@@ -149,7 +161,7 @@ export default function SettingsPage() {
         <main className="max-w-3xl mx-auto p-4 sm:p-6">
           <div className="space-y-6">
             {/* Header */}
-            <div className="bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border-2 border-fridge-cold/30">
+            <div className="bg-card backdrop-blur-sm shadow-xl rounded-2xl p-6 border-2 border-card">
               <div className="flex items-center space-x-3 mb-6">
                 <span className="text-2xl">⚙️</span>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-fridge-primary to-fridge-secondary bg-clip-text text-transparent">
@@ -165,11 +177,11 @@ export default function SettingsPage() {
                 <div className="space-y-6">
                   {/* Language Setting */}
                   <div>
-                    <label className="block text-sm font-semibold text-fridge-dark mb-2">
+                    <label className="block text-sm font-semibold text-primary mb-2">
                       {t('settings.language')}
                     </label>
                     <select
-                      className="w-full px-4 py-2 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all bg-white text-fridge-dark"
+                      className="w-full px-4 py-2 border-2 border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all bg-input text-primary"
                       value={language}
                       onChange={(e) => handleLanguageChange(e.target.value)}
                       disabled={updateMutation.isLoading}
@@ -177,7 +189,7 @@ export default function SettingsPage() {
                       <option value="en">{t('settings.english')}</option>
                       <option value="pl">{t('settings.polish')}</option>
                     </select>
-                    <p className="text-sm text-gray-600 mt-2">
+                    <p className="text-sm text-muted mt-2">
                       {t('settings.selectLanguage')}
                     </p>
                   </div>
@@ -186,21 +198,21 @@ export default function SettingsPage() {
             </div>
 
             {/* Profile Section */}
-            <div className="bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border-2 border-fridge-cold/30">
-              <h2 className="text-xl font-bold text-fridge-dark mb-4 flex items-center space-x-2">
-                <span>👤</span>
-                <span>{t('settings.profile')}</span>
-              </h2>
+            <div className="bg-card backdrop-blur-sm shadow-xl rounded-2xl p-6 border-2 border-card">
+                  <h2 className="text-xl font-bold text-primary mb-4 flex items-center space-x-2">
+                    <span>👤</span>
+                    <span>{t('settings.profile')}</span>
+                  </h2>
 
               <div className="space-y-4">
                 {/* Email (read-only for now) */}
                 <div>
-                  <label className="block text-sm font-semibold text-fridge-dark mb-1.5">
-                    {t('settings.email')}
-                  </label>
-                  <input
-                    type="email"
-                    className="w-full px-4 py-2 border-2 border-fridge-cold rounded-xl bg-gray-100 text-gray-600 cursor-not-allowed"
+                      <label className="block text-sm font-semibold text-primary mb-1.5">
+                        {t('settings.email')}
+                      </label>
+                      <input
+                        type="email"
+                        className="w-full px-4 py-2 border-2 border-input rounded-xl bg-gray-100 dark:bg-gray-700 text-muted cursor-not-allowed"
                     value={email}
                     readOnly
                     disabled
@@ -213,9 +225,9 @@ export default function SettingsPage() {
             </div>
 
             {/* Password Change Section */}
-            <div className="bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border-2 border-fridge-cold/30">
+            <div className="bg-card backdrop-blur-sm shadow-xl rounded-2xl p-6 border-2 border-card">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-fridge-dark flex items-center space-x-2">
+                <h2 className="text-xl font-bold text-primary flex items-center space-x-2">
                   <span>🔒</span>
                   <span>{t('settings.changePassword')}</span>
                 </h2>
@@ -228,38 +240,38 @@ export default function SettingsPage() {
               </div>
 
               {showPasswordChange && (
-                <div className="space-y-4 pt-4 border-t border-fridge-cold/30">
+                <div className="space-y-4 pt-4 border-t border-card">
                   <div>
-                    <label className="block text-sm font-semibold text-fridge-dark mb-1.5">
+                    <label className="block text-sm font-semibold text-primary mb-1.5">
                       {t('settings.currentPassword')}
                     </label>
                     <input
                       type="password"
-                      className="w-full px-4 py-2 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all text-fridge-dark"
+                      className="w-full px-4 py-2 border-2 border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all bg-input text-primary"
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       placeholder={t('settings.currentPassword')}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-fridge-dark mb-1.5">
-                      {t('settings.newPassword')}
-                    </label>
-                    <input
-                      type="password"
-                      className="w-full px-4 py-2 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all text-fridge-dark"
+                        <label className="block text-sm font-semibold text-primary mb-1.5">
+                          {t('settings.newPassword')}
+                        </label>
+                        <input
+                          type="password"
+                          className="w-full px-4 py-2 border-2 border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all bg-input text-primary"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder={t('settings.newPassword')}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-fridge-dark mb-1.5">
-                      {t('settings.confirmPassword')}
-                    </label>
-                    <input
-                      type="password"
-                      className="w-full px-4 py-2 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all text-fridge-dark"
+                        <label className="block text-sm font-semibold text-primary mb-1.5">
+                          {t('settings.confirmPassword')}
+                        </label>
+                        <input
+                          type="password"
+                          className="w-full px-4 py-2 border-2 border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all bg-input text-primary"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder={t('settings.confirmPassword')}
@@ -276,14 +288,14 @@ export default function SettingsPage() {
             </div>
 
             {/* Danger Zone */}
-            <div className="bg-red-50/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border-2 border-red-200">
-              <h2 className="text-xl font-bold text-red-800 mb-4 flex items-center space-x-2">
+            <div className="bg-red-50/90 dark:bg-red-900/20 backdrop-blur-sm shadow-xl rounded-2xl p-6 border-2 border-red-200 dark:border-red-800">
+              <h2 className="text-xl font-bold text-red-800 dark:text-red-300 mb-4 flex items-center space-x-2">
                 <span>⚠️</span>
                 <span>{t('settings.dangerZone')}</span>
               </h2>
-              <p className="text-sm text-red-700 mb-4">
-                {t('settings.deleteAccountWarning')}
-              </p>
+                  <p className="text-sm text-red-700 dark:text-red-300 mb-4">
+                    {t('settings.deleteAccountWarning')}
+                  </p>
               <button
                 className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all font-semibold"
                 onClick={() => {
