@@ -45,7 +45,13 @@ pnpm install
    - Użyj **Connection Pooling** (port 6543) dla `DATABASE_URL`
    - Użyj **Direct Connection** (port 5432) dla `DIRECT_URL`
 
-### 4. Utwórz plik `.env` w głównym katalogu
+### 4. Skonfiguruj OpenAI API (opcjonalne - dla generowania przepisów)
+
+1. Utwórz konto na [platform.openai.com](https://platform.openai.com)
+2. Przejdź do **API Keys** i utwórz nowy klucz API
+3. Skopiuj klucz API (będzie potrzebny w następnym kroku)
+
+### 5. Utwórz plik `.env` w głównym katalogu
 
 ```bash
 # Supabase Configuration
@@ -67,7 +73,12 @@ DIRECT_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT_REF].supabase.co:5432/p
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 NEXT_PUBLIC_API_URL=http://localhost:3001
+
+# OpenAI API Key (opcjonalne - dla generowania przepisów)
+OPENAI_API_KEY=your_openai_api_key
 ```
+
+**📝 Uwaga:** `OPENAI_API_KEY` jest opcjonalne - potrzebne tylko do funkcji generowania przepisów. Możesz uzyskać klucz API na [platform.openai.com](https://platform.openai.com).
 
 ### 6. Skonfiguruj Mobile (`apps/mobile/app.json`)
 

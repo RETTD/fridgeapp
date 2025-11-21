@@ -146,6 +146,26 @@
     "lightMode": "Light Mode",
     "darkMode": "Dark Mode",
     "selectTheme": "Choose between light and dark theme"
+  },
+  "recipes": {
+    "title": "Generate Recipe",
+    "selectProducts": "Select products to generate a recipe",
+    "selectProductsHint": "Select products (especially those expiring soon) to generate a recipe",
+    "generateRecipe": "Generate Recipe",
+    "generating": "Generating recipe...",
+    "recipeGenerated": "Recipe generated successfully!",
+    "recipeError": "Failed to generate recipe",
+    "noProductsSelected": "Please select at least one product",
+    "recipeName": "Recipe Name",
+    "description": "Description",
+    "ingredients": "Ingredients",
+    "steps": "Steps",
+    "cookingTime": "Cooking Time",
+    "servings": "Servings",
+    "tips": "Tips",
+    "selectProductsToGenerate": "Select products to generate recipe",
+    "selected": "selected",
+    "clearSelection": "Clear Selection"
   }
 }
 

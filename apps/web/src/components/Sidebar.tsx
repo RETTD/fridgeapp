@@ -27,6 +27,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     { href: '/dashboard', label: t('dashboard.title'), icon: '🏠' },
     { href: '/dashboard/search', label: t('search.title'), icon: '🔍' },
     { href: '/dashboard/add', label: t('products.addProduct'), icon: '➕' },
+    { href: '/dashboard/recipes', label: t('recipes.title'), icon: '🍳' },
     { href: '/dashboard/settings', label: t('settings.title'), icon: '⚙️' },
   ];
 

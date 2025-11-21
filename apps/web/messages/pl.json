@@ -146,6 +146,26 @@
     "lightMode": "Tryb jasny",
     "darkMode": "Tryb ciemny",
     "selectTheme": "Wybierz między jasnym a ciemnym motywem"
+  },
+  "recipes": {
+    "title": "Generuj Przepis",
+    "selectProducts": "Wybierz produkty do wygenerowania przepisu",
+    "selectProductsHint": "Wybierz produkty (szczególnie te z krótkim terminem) aby wygenerować przepis",
+    "generateRecipe": "Generuj Przepis",
+    "generating": "Generowanie przepisu...",
+    "recipeGenerated": "Przepis wygenerowany pomyślnie!",
+    "recipeError": "Nie udało się wygenerować przepisu",
+    "noProductsSelected": "Wybierz przynajmniej jeden produkt",
+    "recipeName": "Nazwa przepisu",
+    "description": "Opis",
+    "ingredients": "Składniki",
+    "steps": "Kroki",
+    "cookingTime": "Czas gotowania",
+    "servings": "Porcje",
+    "tips": "Wskazówki",
+    "selectProductsToGenerate": "Wybierz produkty do wygenerowania przepisu",
+    "selected": "wybranych",
+    "clearSelection": "Wyczyść wybór"
   }
 }
 
