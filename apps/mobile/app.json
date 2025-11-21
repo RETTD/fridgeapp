@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "Fridge App",
+    "slug": "fridge-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "scheme": "fridge-app",
+    "extra": {
+      "supabaseUrl": "https://qaxqjwwuflauyskrdaie.supabase.co",
+      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFheHFqd3d1ZmxhdXlza3JkYWllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM3NDkwNDcsImV4cCI6MjA3OTMyNTA0N30.Wet9vhUYiQLMEiLQk6JyPQZP0tLicRCiGdxMN2tdQck",
+      "apiUrl": "http://localhost:3001/trpc"
+    }
+  }
+}

@@ -14,22 +14,40 @@ export const productsRouter = router({
         .optional()
     )
     .query(async ({ ctx, input }) => {
-      const products = await ctx.prisma.product.findMany({
-        where: {
-          userId: ctx.userId!,
-          name: input?.filter
-            ? {
-                contains: input.filter,
-                mode: 'insensitive',
-              }
-            : undefined,
-        },
-        orderBy: {
-          [input?.sortBy || 'expiryDate']: 'asc',
-        },
-      });
-      // Zawsze zwracaj tablicę, nawet jeśli pusta
-      return products || [];
+      // Upewnij się że userId istnieje
+      if (!ctx.userId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'User ID is missing',
+        });
+      }
+
+      try {
+        const products = await ctx.prisma.product.findMany({
+          where: {
+            userId: ctx.userId,
+            name: input?.filter
+              ? {
+                  contains: input.filter,
+                  mode: 'insensitive',
+                }
+              : undefined,
+          },
+          orderBy: {
+            [input?.sortBy || 'expiryDate']: 'asc',
+          },
+        });
+        
+        // ZAWSZE zwracaj tablicę - nawet jeśli null/undefined
+        if (!products || !Array.isArray(products)) {
+          return [];
+        }
+        return products;
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        // W przypadku błędu bazy danych, zwróć pustą tablicę
+        return [];
+      }
     }),
 
   // Get single product
@@ -163,8 +181,11 @@ export const productsRouter = router({
           expiryDate: 'asc',
         },
       });
-      // Zawsze zwracaj tablicę, nawet jeśli pusta
-      return products || [];
+      // ZAWSZE zwracaj tablicę - nawet jeśli null/undefined
+      if (!products || !Array.isArray(products)) {
+        return [];
+      }
+      return products;
     }),
 });
 

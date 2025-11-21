@@ -2,11 +2,15 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { trpc } from '@/utils/trpc';
 import toast from 'react-hot-toast';
+import { Sidebar } from '@/components/Sidebar';
+import { HamburgerButton } from '@/components/HamburgerButton';
 
 export default function AddProductPage() {
   const router = useRouter();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [name, setName] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [quantity, setQuantity] = useState(1);
@@ -43,103 +47,140 @@ export default function AddProductPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <a href="/dashboard" className="text-indigo-600 hover:text-indigo-500">
-                ← Back to Dashboard
-              </a>
+    <div className="min-h-screen bg-gradient-to-br from-fridge-ice via-white to-fridge-light flex">
+      {/* Sidebar */}
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+      {/* Main Content */}
+      <div className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-0'}`}>
+        {/* Top Navigation - Mobile: niebieski pasek z hamburgerem */}
+        <nav className="lg:hidden bg-gradient-to-r from-fridge-primary to-fridge-secondary shadow-md sticky top-0 z-30">
+          <div className="px-4 h-16 flex items-center">
+            <HamburgerButton
+              isOpen={sidebarOpen}
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+            />
+          </div>
+        </nav>
+
+        {/* Top Navigation - Desktop: pełna nawigacja */}
+        <nav className="hidden lg:block bg-white/80 backdrop-blur-sm shadow-sm border-b border-fridge-cold/20 sticky top-0 z-30">
+          <div className="px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex items-center space-x-4">
+                <HamburgerButton
+                  isOpen={sidebarOpen}
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                />
+                <Link
+                  href="/dashboard"
+                  className="flex items-center space-x-2 text-fridge-primary hover:text-fridge-secondary transition-colors"
+                >
+                  <span>←</span>
+                  <span>Back to Dashboard</span>
+                </Link>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-2xl">🧊</span>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-fridge-primary to-fridge-secondary bg-clip-text text-transparent">
+                  Fridge App
+                </h1>
+              </div>
             </div>
           </div>
-        </div>
-      </nav>
+        </nav>
 
-      <main className="max-w-2xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="bg-white shadow rounded-lg p-6">
-          <h1 className="text-2xl font-bold mb-6">Add Product</h1>
+        <main className="max-w-2xl mx-auto p-6">
+          <div className="bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-8 border-2 border-fridge-cold/30">
+            <div className="flex items-center space-x-3 mb-6">
+              <span className="text-3xl">➕</span>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-fridge-primary to-fridge-secondary bg-clip-text text-transparent">
+                Add Product
+              </h1>
+            </div>
           
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-semibold text-fridge-dark mb-2">
                 Product Name *
               </label>
               <input
                 type="text"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="e.g., Milk, Bread, Eggs"
+                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-semibold text-fridge-dark mb-2">
                 Expiry Date *
               </label>
               <input
                 type="date"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all"
                 value={expiryDate}
                 onChange={(e) => setExpiryDate(e.target.value)}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-semibold text-fridge-dark mb-2">
                 Quantity
               </label>
               <input
                 type="number"
                 min="1"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all"
                 value={quantity}
                 onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-semibold text-fridge-dark mb-2">
                 Category
               </label>
               <input
                 type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="e.g., Dairy, Meat, Vegetables"
+                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-semibold text-fridge-dark mb-2">
                 Location
               </label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all bg-white"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
               >
                 <option value="">Select location</option>
-                <option value="fridge">Fridge</option>
-                <option value="freezer">Freezer</option>
-                <option value="pantry">Pantry</option>
+                <option value="fridge">🧊 Fridge</option>
+                <option value="freezer">❄️ Freezer</option>
+                <option value="pantry">📦 Pantry</option>
               </select>
             </div>
 
-            <div className="flex space-x-4">
+            <div className="flex space-x-4 pt-4">
               <button
                 type="submit"
                 disabled={createMutation.isLoading}
-                className="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                className="flex-1 bg-gradient-to-r from-fridge-primary to-fridge-secondary text-white py-3 px-6 rounded-xl hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fridge-primary disabled:opacity-50 transition-all font-semibold"
               >
-                {createMutation.isLoading ? 'Adding...' : 'Add Product'}
+                {createMutation.isLoading ? '⏳ Adding...' : '✅ Add Product'}
               </button>
               <button
                 type="button"
                 onClick={() => router.push('/dashboard')}
-                className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                className="flex-1 bg-fridge-light text-fridge-dark py-3 px-6 rounded-xl hover:bg-fridge-cold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fridge-primary transition-all font-semibold"
               >
                 Cancel
               </button>
@@ -147,6 +188,7 @@ export default function AddProductPage() {
           </form>
         </div>
       </main>
+      </div>
     </div>
   );
 }

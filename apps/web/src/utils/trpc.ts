@@ -13,10 +13,34 @@ export function getTRPCClient() {
       httpBatchLink({
         url: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/trpc',
         async headers() {
-          const { data: { session } } = await supabase.auth.getSession();
-          return {
-            authorization: session?.access_token ? `Bearer ${session.access_token}` : '',
-          };
+          try {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            if (error) {
+              console.error('Error getting session:', error);
+              return {};
+            }
+            const token = session?.access_token;
+            if (token) {
+              return {
+                authorization: `Bearer ${token}`,
+              };
+            }
+            return {};
+          } catch (error) {
+            console.error('Error in headers:', error);
+            return {};
+          }
+        },
+        // Dodaj obsługę błędów HTTP
+        fetch(url, options) {
+          return fetch(url, options).then(async (response) => {
+            if (!response.ok) {
+              const text = await response.text();
+              console.error('HTTP Error:', response.status, text);
+              throw new Error(`HTTP Error: ${response.status}`);
+            }
+            return response;
+          });
         },
       }),
     ],
