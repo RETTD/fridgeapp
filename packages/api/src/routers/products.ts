@@ -291,5 +291,94 @@ export const productsRouter = router({
       };
     }
   }),
+
+  // Get product by barcode from Open Food Facts
+  getByBarcode: protectedProcedure
+    .input(z.object({ barcode: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      // Wywołaj REST API Open Food Facts bezpośrednio (prostsze i bardziej niezawodne)
+      try {
+        const url = `https://world.openfoodfacts.org/api/v0/product/${encodeURIComponent(input.barcode)}.json`;
+        console.log(`Fetching product from Open Food Facts REST API: ${url}`);
+        
+        // Dodaj timeout (10 sekund)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        
+        let response: Response;
+        try {
+          response = await fetch(url, {
+            method: 'GET',
+            signal: controller.signal,
+          });
+          clearTimeout(timeoutId);
+        } catch (fetchError: any) {
+          clearTimeout(timeoutId);
+          if (fetchError.name === 'AbortError') {
+            throw new TRPCError({
+              code: 'TIMEOUT',
+              message: 'Request to Open Food Facts API timed out',
+            });
+          }
+          throw fetchError;
+        }
+
+        console.log(`Response status: ${response.status}`);
+
+        if (!response.ok) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: `Failed to fetch product from Open Food Facts (HTTP ${response.status})`,
+          });
+        }
+
+        const data = await response.json();
+        
+        if (data.status !== 1 || !data.product) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Product not found in Open Food Facts',
+          });
+        }
+
+        const product = data.product;
+        
+        // Normalizuj dane do tego samego formatu co MCP
+        const normalizedProduct = {
+          name: product.product_name || product.product_name_en || '',
+          brand: product.brands || '',
+          barcode: product.code || input.barcode,
+          image: product.image_url || '',
+          ingredients: product.ingredients_text || '',
+          allergens: product.allergens || '',
+          nutrition: {
+            calories: product.nutriments?.['energy-kcal_100g'] || product.nutriments?.['energy-kcal'],
+            protein: product.nutriments?.proteins_100g || product.nutriments?.proteins,
+            carbs: product.nutriments?.carbohydrates_100g || product.nutriments?.carbohydrates,
+            fat: product.nutriments?.fat_100g || product.nutriments?.fat,
+            fiber: product.nutriments?.fiber_100g || product.nutriments?.fiber,
+            sugars: product.nutriments?.sugars_100g || product.nutriments?.sugars,
+            salt: product.nutriments?.salt_100g || product.nutriments?.salt,
+          },
+          labels: product.labels_tags || [],
+          categories: product.categories_tags || [],
+        };
+
+        console.log('Product fetched successfully:', !!normalizedProduct.name);
+        return normalizedProduct;
+      } catch (error) {
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+        
+        console.error('Error fetching product by barcode:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: `Failed to fetch product from Open Food Facts: ${errorMessage}`,
+          cause: error,
+        });
+      }
+    }),
 });
 
