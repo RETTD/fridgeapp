@@ -1,0 +1,31 @@
+{
+  "name": "fridge-app-supabase",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:web": "turbo run dev --filter=web",
+    "dev:mobile": "turbo run dev --filter=mobile",
+    "dev:api": "turbo run dev --filter=api",
+    "build": "turbo run build",
+    "db:push": "pnpm --filter=database db:push",
+    "db:migrate": "pnpm --filter=database db:migrate",
+    "db:studio": "pnpm --filter=database db:studio",
+    "db:generate": "pnpm --filter=database generate"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "prettier": "^3.1.0",
+    "turbo": "^1.11.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0"
+}
+

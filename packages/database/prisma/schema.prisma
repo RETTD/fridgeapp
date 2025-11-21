@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Uwaga: Supabase używa własnej tabeli auth.users dla autentykacji
+// Ta tabela User jest tylko dla dodatkowych danych profilu
+model User {
+  id            String    @id // To będzie Supabase user.id (UUID)
+  email         String    @unique
+  name          String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  products      Product[]
+  notifications Notification[]
+  
+  @@map("users")
+}
+
+model Product {
+  id              String    @id @default(cuid())
+  name            String
+  expiryDate      DateTime
+  quantity        Int       @default(1)
+  category        String?
+  location        String?   // "fridge", "freezer", "pantry"
+  imageUrl        String?
+  notes           String?
+  
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@index([userId])
+  @@index([expiryDate])
+  @@map("products")
+}
+
+model Notification {
+  id              String    @id @default(cuid())
+  type            String    // "email", "telegram", "discord", "push"
+  message         String
+  sent            Boolean   @default(false)
+  scheduledFor    DateTime
+  sentAt          DateTime?
+  
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime  @default(now())
+  
+  @@index([userId])
+  @@index([scheduledFor])
+  @@map("notifications")
+}
+
