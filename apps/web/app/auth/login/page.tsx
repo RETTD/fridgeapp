@@ -27,7 +27,7 @@ export default function LoginPage() {
       return;
     }
 
-    toast.success('Welcome back! 👋');
+    toast.success(`${t('auth.welcomeBack')} 👋`);
     router.push('/dashboard');
   };
 
@@ -39,15 +39,15 @@ export default function LoginPage() {
             <span className="text-6xl block">🧊</span>
           </div>
           <h2 className="text-3xl font-bold bg-gradient-to-r from-fridge-primary to-fridge-secondary bg-clip-text text-transparent">
-            Welcome Back!
+            {t('auth.welcomeBack')}!
           </h2>
-          <p className="mt-2 text-fridge-dark/70">Sign in to manage your fridge</p>
+          <p className="mt-2 text-fridge-dark/70">{t('auth.signInToManage')}</p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-fridge-dark mb-2">
-                Email address
+                {t('auth.emailAddress')}
               </label>
               <input
                 id="email"
@@ -63,7 +63,7 @@ export default function LoginPage() {
             </div>
             <div>
               <label htmlFor="password" className="block text-sm font-semibold text-fridge-dark mb-2">
-                Password
+                {t('auth.password')}
               </label>
               <input
                 id="password"
@@ -88,12 +88,12 @@ export default function LoginPage() {
               {loading ? (
                 <>
                   <span className="animate-spin">⏳</span>
-                  <span>Signing in...</span>
+                  <span>{t('auth.signingIn')}</span>
                 </>
               ) : (
                 <>
                   <span>🔓</span>
-                  <span>Sign in</span>
+                  <span>{t('auth.signIn')}</span>
                 </>
               )}
             </button>
@@ -104,7 +104,7 @@ export default function LoginPage() {
               href="/auth/register"
               className="text-sm text-fridge-primary hover:text-fridge-secondary font-medium transition-colors"
             >
-              Don't have an account? Sign up →
+              {t('auth.dontHaveAccount')}
             </Link>
           </div>
         </form>

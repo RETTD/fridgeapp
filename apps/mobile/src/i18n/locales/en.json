@@ -1,0 +1,72 @@
+{
+  "common": {
+    "appName": "Fridge App",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "back": "Back"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "loginSuccess": "Logged in successfully",
+    "registerSuccess": "Account created successfully"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "addProduct": "Add Product",
+    "searchProducts": "Search Products",
+    "expired": "Expired Products",
+    "expiringSoon": "Expiring Soon",
+    "wastedLastMonth": "Wasted Last Month",
+    "emptyFridge": "Your fridge is empty!",
+    "startTracking": "Start tracking your products to reduce waste",
+    "addFirstProduct": "Add your first product"
+  },
+  "products": {
+    "name": "Product Name",
+    "expiryDate": "Expiry Date",
+    "quantity": "Quantity",
+    "category": "Category",
+    "location": "Location",
+    "expires": "Expires",
+    "expired": "Expired",
+    "days": "days",
+    "ago": "ago",
+    "noCategory": "No category",
+    "addNewCategory": "Add new category",
+    "categoryName": "Category name",
+    "addProduct": "Add Product",
+    "adding": "Adding...",
+    "productAdded": "Product added successfully!"
+  },
+  "search": {
+    "title": "Search Products",
+    "placeholder": "Search by product name...",
+    "noResults": "No products found",
+    "startSearching": "Start searching",
+    "noMatch": "No products match",
+    "found": "Found",
+    "products": "products",
+    "product": "product"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "selectLanguage": "Select Language",
+    "english": "English",
+    "polish": "Polish",
+    "settingsUpdated": "Settings updated successfully"
+  }
+}
+

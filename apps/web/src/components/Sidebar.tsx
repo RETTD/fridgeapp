@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { supabase } from '@/utils/supabase';
+import { useTranslations } from 'next-intl';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const t = useTranslations();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -20,8 +22,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   };
 
   const menuItems = [
-    { href: '/dashboard', label: 'Dashboard', icon: '🏠' },
-    { href: '/dashboard/add', label: 'Add Product', icon: '➕' },
+    { href: '/dashboard', label: t('dashboard.title'), icon: '🏠' },
+    { href: '/dashboard/search', label: t('search.title'), icon: '🔍' },
+    { href: '/dashboard/add', label: t('products.addProduct'), icon: '➕' },
+    { href: '/dashboard/settings', label: t('settings.title'), icon: '⚙️' },
   ];
 
   return (
@@ -42,12 +46,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="p-6 border-b border-white/20">
-            <div className="flex items-center space-x-3">
-              <span className="text-3xl">🧊</span>
-              <h1 className="text-2xl font-bold text-white">Fridge App</h1>
-            </div>
-          </div>
+              <div className="p-6 border-b border-white/20">
+                <div className="flex items-center space-x-3">
+                  <span className="text-3xl">🧊</span>
+                  <h1 className="text-2xl font-bold text-white">{t('common.appName')}</h1>
+                </div>
+              </div>
 
           {/* Menu Items */}
           <nav className="flex-1 p-4 space-y-2">
@@ -72,15 +76,15 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           </nav>
 
           {/* Logout Button */}
-          <div className="p-4 border-t border-white/20">
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-all"
-            >
-              <span className="text-xl">🚪</span>
-              <span>Logout</span>
-            </button>
-          </div>
+              <div className="p-4 border-t border-white/20">
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-all"
+                >
+                  <span className="text-xl">🚪</span>
+                  <span>{t('auth.logout')}</span>
+                </button>
+              </div>
         </div>
       </div>
     </>

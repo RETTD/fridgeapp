@@ -33,6 +33,9 @@ export const productsRouter = router({
                 }
               : undefined,
           },
+          include: {
+            category: true, // Include category relation
+          },
           orderBy: {
             [input?.sortBy || 'expiryDate']: 'asc',
           },
@@ -78,18 +81,35 @@ export const productsRouter = router({
         name: z.string().min(1),
         expiryDate: z.string().datetime(),
         quantity: z.number().positive().default(1),
-        category: z.string().optional(),
+        categoryId: z.string().optional(), // Zmienione z category (string) na categoryId
         location: z.string().optional(),
         notes: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // Jeśli categoryId jest podane, sprawdź czy kategoria należy do użytkownika
+      if (input.categoryId) {
+        const category = await ctx.prisma.category.findFirst({
+          where: {
+            id: input.categoryId,
+            userId: ctx.userId!,
+          },
+        });
+
+        if (!category) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Category not found or does not belong to user',
+          });
+        }
+      }
+
       return ctx.prisma.product.create({
         data: {
           name: input.name,
           expiryDate: new Date(input.expiryDate),
           quantity: input.quantity,
-          category: input.category,
+          categoryId: input.categoryId,
           location: input.location,
           notes: input.notes,
           userId: ctx.userId!,
@@ -105,13 +125,13 @@ export const productsRouter = router({
         name: z.string().min(1).optional(),
         expiryDate: z.string().datetime().optional(),
         quantity: z.number().positive().optional(),
-        category: z.string().optional(),
+        categoryId: z.string().optional(), // Zmienione z category na categoryId
         location: z.string().optional(),
         notes: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, ...data } = input;
+      const { id, categoryId, ...data } = input;
 
       // Verify ownership
       const existing = await ctx.prisma.product.findFirst({
@@ -125,10 +145,28 @@ export const productsRouter = router({
         });
       }
 
+      // Jeśli categoryId jest podane, sprawdź czy kategoria należy do użytkownika
+      if (categoryId) {
+        const category = await ctx.prisma.category.findFirst({
+          where: {
+            id: categoryId,
+            userId: ctx.userId!,
+          },
+        });
+
+        if (!category) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Category not found or does not belong to user',
+          });
+        }
+      }
+
       return ctx.prisma.product.update({
         where: { id },
         data: {
           ...data,
+          categoryId: categoryId !== undefined ? categoryId : undefined,
           expiryDate: data.expiryDate ? new Date(data.expiryDate) : undefined,
         },
       });
@@ -187,5 +225,71 @@ export const productsRouter = router({
       }
       return products;
     }),
+
+  // Get statistics
+  stats: protectedProcedure.query(async ({ ctx }) => {
+    if (!ctx.userId) {
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message: 'User ID is missing',
+      });
+    }
+
+    try {
+      const now = new Date();
+      const threeDaysFromNow = new Date();
+      threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
+      
+      const oneMonthAgo = new Date();
+      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+      // Przeterminowane produkty
+      const expiredCount = await ctx.prisma.product.count({
+        where: {
+          userId: ctx.userId,
+          expiryDate: {
+            lt: now,
+          },
+        },
+      });
+
+      // Produkty wygasające w ciągu 3 dni
+      const expiringSoonCount = await ctx.prisma.product.count({
+        where: {
+          userId: ctx.userId,
+          expiryDate: {
+            gte: now,
+            lte: threeDaysFromNow,
+          },
+        },
+      });
+
+      // Produkty zmarnowane w ostatnim miesiącu (przeterminowane i usunięte)
+      // Uwaga: to jest przybliżenie - liczymy przeterminowane produkty z ostatniego miesiąca
+      // W przyszłości można dodać pole deletedAt do Product
+      const wastedCount = await ctx.prisma.product.count({
+        where: {
+          userId: ctx.userId,
+          expiryDate: {
+            lt: now,
+            gte: oneMonthAgo,
+          },
+        },
+      });
+
+      return {
+        expired: expiredCount,
+        expiringSoon: expiringSoonCount,
+        wastedLastMonth: wastedCount,
+      };
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      return {
+        expired: 0,
+        expiringSoon: 0,
+        wastedLastMonth: 0,
+      };
+    }
+  }),
 });
 

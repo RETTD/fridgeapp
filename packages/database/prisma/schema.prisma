@@ -13,13 +13,34 @@ model User {
   id            String    @id // To będzie Supabase user.id (UUID)
   email         String    @unique
   name          String?
+  language      String?   @default("en") // Language preference: "en", "pl", etc.
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   
   products      Product[]
+  categories    Category[]
   notifications Notification[]
   
   @@map("users")
+}
+
+model Category {
+  id              String    @id @default(cuid())
+  name            String
+  color           String?   // Opcjonalny kolor dla kategorii (hex)
+  icon            String?   // Opcjonalna ikona dla kategorii
+  
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  products        Product[]
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@unique([userId, name]) // Użytkownik nie może mieć dwóch kategorii o tej samej nazwie
+  @@index([userId])
+  @@map("categories")
 }
 
 model Product {
@@ -27,7 +48,8 @@ model Product {
   name            String
   expiryDate      DateTime
   quantity        Int       @default(1)
-  category        String?
+  categoryId      String?   // Relacja do Category zamiast String
+  category        Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   location        String?   // "fridge", "freezer", "pantry"
   imageUrl        String?
   notes           String?
@@ -40,6 +62,7 @@ model Product {
   
   @@index([userId])
   @@index([expiryDate])
+  @@index([categoryId])
   @@map("products")
 }
 

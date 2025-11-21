@@ -8,9 +8,11 @@ import { supabase } from '@/utils/supabase';
 import toast from 'react-hot-toast';
 import { Sidebar } from '@/components/Sidebar';
 import { HamburgerButton } from '@/components/HamburgerButton';
+import { useTranslations } from 'next-intl';
 
 export default function DashboardPage() {
   const router = useRouter();
+  const t = useTranslations();
   const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -62,10 +64,16 @@ export default function DashboardPage() {
   // Zawsze upewnij się że expiring jest tablicą
   const expiring = Array.isArray(expiringQuery.data) ? expiringQuery.data : [];
 
+  // Fetch statistics
+  const { data: stats } = trpc.products.stats.useQuery(undefined, {
+    enabled: mounted,
+    refetchOnWindowFocus: false,
+  });
+
   const utils = trpc.useUtils();
   const deleteMutation = trpc.products.delete.useMutation({
     onSuccess: () => {
-      toast.success('Product deleted successfully!');
+      toast.success(t('products.productDeleted'));
       utils.products.list.invalidate();
       utils.products.expiringSoon.invalidate();
     },
@@ -80,7 +88,7 @@ export default function DashboardPage() {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm('Are you sure you want to delete this product?')) {
+    if (confirm(t('products.deleteConfirm'))) {
       deleteMutation.mutate({ id });
     }
   };
@@ -89,7 +97,7 @@ export default function DashboardPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -114,24 +122,24 @@ export default function DashboardPage() {
       return (
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center max-w-md">
-            <h1 className="text-2xl font-bold text-red-600 mb-4">Error</h1>
-            <p className="text-gray-600 mb-2">{error.message || 'Unknown error'}</p>
+            <h1 className="text-2xl font-bold text-red-600 mb-4">{t('common.error')}</h1>
+            <p className="text-gray-600 mb-2">{error.message || t('dashboard.unknownError')}</p>
             <p className="text-sm text-gray-500 mb-4">
               {errorCode === 'INTERNAL_SERVER_ERROR' 
-                ? 'There was a server error. Please try again later.'
+                ? t('dashboard.serverError')
                 : errorCode === 'BAD_REQUEST'
-                ? 'Invalid request. Please check your input.'
+                ? t('dashboard.invalidRequest')
                 : errorCode === 'NOT_FOUND'
-                ? 'Resource not found.'
+                ? t('dashboard.resourceNotFound')
                 : errorCode === 'TIMEOUT'
-                ? 'Request timed out. Please try again.'
-                : `Error ${httpStatus || errorCode}. Please try again.`}
+                ? t('dashboard.requestTimeout')
+                : `${t('common.error')} ${httpStatus || errorCode}. ${t('dashboard.errorOccurred')}`}
             </p>
             <button
               onClick={() => refetch()}
               className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
             >
-              Retry
+              {t('dashboard.retry')}
             </button>
           </div>
         </div>
@@ -168,7 +176,7 @@ export default function DashboardPage() {
                 <div className="flex items-center space-x-2">
                   <span className="text-2xl">🧊</span>
                   <h1 className="text-xl font-bold bg-gradient-to-r from-fridge-primary to-fridge-secondary bg-clip-text text-transparent">
-                    Fridge App
+                    {t('common.appName')}
                   </h1>
                 </div>
               </div>
@@ -177,7 +185,7 @@ export default function DashboardPage() {
                   href="/dashboard/add"
                   className="px-4 py-2 bg-gradient-to-r from-fridge-primary to-fridge-secondary text-white rounded-lg hover:shadow-lg transition-all font-medium"
                 >
-                  ➕ Add Product
+                  ➕ {t('products.addProduct')}
                 </Link>
               </div>
             </div>
@@ -185,12 +193,52 @@ export default function DashboardPage() {
         </nav>
 
         <main className="p-4 sm:p-6 lg:p-8">
-        {expiring && expiring.length > 0 && (
-          <div className="mb-6 bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-200 rounded-xl p-5 shadow-lg">
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            {/* Expired Products */}
+            <div className="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-300 rounded-xl p-6 shadow-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-3xl">⛔</span>
+                <span className="text-4xl font-bold text-red-600">
+                  {stats?.expired || 0}
+                </span>
+              </div>
+              <h3 className="text-lg font-semibold text-red-800">{t('dashboard.expiredProducts')}</h3>
+              <p className="text-sm text-red-700 mt-1">{t('dashboard.productsPastExpiry')}</p>
+            </div>
+
+            {/* Expiring Soon */}
+            <div className="bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-300 rounded-xl p-6 shadow-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-3xl">⚠️</span>
+                <span className="text-4xl font-bold text-orange-600">
+                  {stats?.expiringSoon || 0}
+                </span>
+              </div>
+              <h3 className="text-lg font-semibold text-orange-800">{t('dashboard.expiringSoonProducts')}</h3>
+              <p className="text-sm text-orange-700 mt-1">{t('dashboard.expiresWithin3Days')}</p>
+            </div>
+
+            {/* Wasted Last Month */}
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-300 rounded-xl p-6 shadow-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-3xl">💔</span>
+                <span className="text-4xl font-bold text-purple-600">
+                  {stats?.wastedLastMonth || 0}
+                </span>
+              </div>
+              <h3 className="text-lg font-semibold text-purple-800">{t('dashboard.wastedProducts')}</h3>
+              <p className="text-sm text-purple-700 mt-1">{t('dashboard.expiredInLast30Days')}</p>
+            </div>
+          </div>
+
+          {/* Expiring Soon Alert */}
+          {expiring && expiring.length > 0 && (
+            <div className="mb-6 bg-gradient-to-r from-orange-50 to-yellow-50 border-2 border-orange-200 rounded-xl p-4 shadow-lg">
             <div className="flex items-center space-x-2 mb-3">
               <span className="text-2xl">⚠️</span>
               <h2 className="text-lg font-bold text-orange-800">
-                Expiring Soon ({expiring.length})
+                {t('dashboard.expiringSoonProducts')} ({expiring.length})
               </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -200,8 +248,8 @@ export default function DashboardPage() {
                   className="bg-white/60 rounded-lg p-3 text-sm text-orange-900"
                 >
                   <span className="font-semibold">{product.name}</span>
-                  <span className="text-orange-700">
-                    {' '}- expires {new Date(product.expiryDate).toLocaleDateString()}
+                    <span className="text-orange-700">
+                    {' '}- {t('products.expires')} {new Date(product.expiryDate).toLocaleDateString()}
                   </span>
                 </div>
               ))}
@@ -212,21 +260,21 @@ export default function DashboardPage() {
         {isLoading ? (
           <div className="text-center py-20">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-fridge-primary border-t-transparent mb-4"></div>
-            <p className="text-fridge-dark text-lg">Loading products...</p>
+            <p className="text-fridge-dark text-lg">{t('dashboard.loadingProducts')}</p>
           </div>
         ) : (!Array.isArray(products) || products.length === 0) ? (
           <div className="text-center py-20">
             <div className="mb-6">
               <span className="text-8xl block mb-4">🧊</span>
-              <h2 className="text-2xl font-bold text-fridge-dark mb-2">Your fridge is empty!</h2>
-              <p className="text-fridge-dark/70 mb-6">Start tracking your products to reduce waste</p>
+              <h2 className="text-2xl font-bold text-fridge-dark mb-2">{t('dashboard.emptyFridge')}</h2>
+              <p className="text-fridge-dark/70 mb-6">{t('dashboard.startTracking')}</p>
             </div>
             <Link
               href="/dashboard/add"
               className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-fridge-primary to-fridge-secondary text-white rounded-xl hover:shadow-xl transition-all font-semibold text-lg"
             >
               <span>➕</span>
-              <span>Add your first product</span>
+              <span>{t('dashboard.addFirstProduct')}</span>
             </Link>
           </div>
         ) : (
@@ -264,24 +312,24 @@ export default function DashboardPage() {
                         isExpired ? 'text-red-600' : isExpiringSoon ? 'text-orange-600' : 'text-fridge-dark'
                       }`}>
                         {isExpired
-                          ? `Expired ${Math.abs(daysUntilExpiry)} day${Math.abs(daysUntilExpiry) !== 1 ? 's' : ''} ago`
+                          ? `${t('products.expired')} ${Math.abs(daysUntilExpiry)} ${t('products.days')} ${t('products.ago')}`
                           : isExpiringSoon
-                          ? `Expires in ${daysUntilExpiry} day${daysUntilExpiry !== 1 ? 's' : ''}`
-                          : `Expires: ${expiryDate.toLocaleDateString()}`}
+                          ? `${t('products.expires')} ${t('dashboard.expiresWithin3Days').toLowerCase()} (${daysUntilExpiry} ${t('products.days')})`
+                          : `${t('products.expires')}: ${expiryDate.toLocaleDateString()}`}
                       </span>
                     </div>
 
                     {product.quantity > 1 && (
                       <div className="flex items-center space-x-2 text-sm text-fridge-dark/70">
                         <span>📦</span>
-                        <span>Quantity: {product.quantity}</span>
+                        <span>{t('products.quantity')}: {product.quantity}</span>
                       </div>
                     )}
 
                     {product.category && (
                       <div className="flex items-center space-x-2 text-sm text-fridge-dark/70">
                         <span>🏷️</span>
-                        <span>{product.category}</span>
+                        <span>{product.category.icon && <span className="mr-1">{product.category.icon}</span>}{product.category.name}</span>
                       </div>
                     )}
                   </div>
@@ -290,7 +338,7 @@ export default function DashboardPage() {
                     onClick={() => handleDelete(product.id)}
                     className="w-full mt-4 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium text-sm"
                   >
-                    🗑️ Delete
+                    🗑️ {t('common.delete')}
                   </button>
                 </div>
               );

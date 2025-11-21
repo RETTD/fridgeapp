@@ -1,0 +1,72 @@
+{
+  "common": {
+    "appName": "Aplikacja Lodówka",
+    "loading": "Ładowanie...",
+    "error": "Błąd",
+    "success": "Sukces",
+    "cancel": "Anuluj",
+    "save": "Zapisz",
+    "delete": "Usuń",
+    "edit": "Edytuj",
+    "add": "Dodaj",
+    "search": "Szukaj",
+    "back": "Wstecz"
+  },
+  "auth": {
+    "login": "Zaloguj",
+    "register": "Zarejestruj",
+    "logout": "Wyloguj",
+    "email": "Email",
+    "password": "Hasło",
+    "name": "Imię",
+    "loginSuccess": "Zalogowano pomyślnie",
+    "registerSuccess": "Konto utworzone pomyślnie"
+  },
+  "dashboard": {
+    "title": "Panel główny",
+    "addProduct": "Dodaj produkt",
+    "searchProducts": "Szukaj produktów",
+    "expired": "Przeterminowane",
+    "expiringSoon": "Wygasające wkrótce",
+    "wastedLastMonth": "Zmarnowane w miesiącu",
+    "emptyFridge": "Twoja lodówka jest pusta!",
+    "startTracking": "Zacznij śledzić produkty, aby zmniejszyć marnowanie",
+    "addFirstProduct": "Dodaj swój pierwszy produkt"
+  },
+  "products": {
+    "name": "Nazwa produktu",
+    "expiryDate": "Data ważności",
+    "quantity": "Ilość",
+    "category": "Kategoria",
+    "location": "Lokalizacja",
+    "expires": "Wygasa",
+    "expired": "Przeterminowane",
+    "days": "dni",
+    "ago": "temu",
+    "noCategory": "Brak kategorii",
+    "addNewCategory": "Dodaj nową kategorię",
+    "categoryName": "Nazwa kategorii",
+    "addProduct": "Dodaj produkt",
+    "adding": "Dodawanie...",
+    "productAdded": "Produkt dodany pomyślnie!"
+  },
+  "search": {
+    "title": "Szukaj produktów",
+    "placeholder": "Szukaj po nazwie produktu...",
+    "noResults": "Nie znaleziono produktów",
+    "startSearching": "Zacznij szukać",
+    "noMatch": "Brak produktów pasujących do",
+    "found": "Znaleziono",
+    "products": "produktów",
+    "product": "produkt"
+  },
+  "settings": {
+    "title": "Ustawienia",
+    "language": "Język",
+    "selectLanguage": "Wybierz język",
+    "english": "Angielski",
+    "polish": "Polski",
+    "settingsUpdated": "Ustawienia zaktualizowane pomyślnie"
+  }
+}
+

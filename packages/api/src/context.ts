@@ -30,10 +30,13 @@ export async function createContext({ req, res }: CreateExpressContextOptions) {
                 id: userId,
                 email: userEmail || '',
                 name: user.user_metadata?.name || null,
+                language: 'en', // Default language
               },
               update: {
                 email: userEmail || '',
-                name: user.user_metadata?.name || null,
+                // Only update name if it's not already set in our DB, or if user_metadata has a name
+                name: user.user_metadata?.name || undefined,
+                // Don't update language on every request, only email/name
               },
             });
           } catch (dbError) {

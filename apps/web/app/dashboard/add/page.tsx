@@ -7,20 +7,42 @@ import { trpc } from '@/utils/trpc';
 import toast from 'react-hot-toast';
 import { Sidebar } from '@/components/Sidebar';
 import { HamburgerButton } from '@/components/HamburgerButton';
+import { useTranslations } from 'next-intl';
 
 export default function AddProductPage() {
+  const t = useTranslations();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [name, setName] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [quantity, setQuantity] = useState(1);
-  const [category, setCategory] = useState('');
+  const [categoryId, setCategoryId] = useState<string>('');
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
   const [location, setLocation] = useState('');
 
   const utils = trpc.useUtils();
+  
+  // Fetch categories
+  const { data: categories = [], refetch: refetchCategories } = trpc.categories.list.useQuery();
+  
+  // Create category mutation
+  const createCategoryMutation = trpc.categories.create.useMutation({
+    onSuccess: async (newCategory) => {
+      toast.success(t('products.categoryCreated'));
+      await refetchCategories();
+      setCategoryId(newCategory.id);
+      setShowNewCategoryInput(false);
+      setNewCategoryName('');
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   const createMutation = trpc.products.create.useMutation({
     onSuccess: () => {
-      toast.success('Product added successfully!');
+      toast.success(t('products.productAdded'));
       utils.products.list.invalidate();
       router.push('/dashboard');
     },
@@ -35,12 +57,12 @@ export default function AddProductPage() {
     // Walidacja - sprawdź czy wartości są ustawione
     const trimmedName = name?.trim();
     if (!trimmedName || trimmedName.length === 0) {
-      toast.error('Please enter a product name');
+      toast.error(t('products.productNameRequired'));
       return;
     }
 
     if (!expiryDate || expiryDate.length === 0) {
-      toast.error('Please select an expiry date');
+      toast.error(t('products.expiryDateRequired'));
       return;
     }
 
@@ -49,13 +71,13 @@ export default function AddProductPage() {
     try {
       const date = new Date(expiryDate);
       if (isNaN(date.getTime())) {
-        toast.error('Invalid date format');
+        toast.error(t('products.invalidDate'));
         return;
       }
       expiryDateISO = date.toISOString();
     } catch (error) {
       console.error('Date conversion error:', error);
-      toast.error('Invalid date format');
+      toast.error(t('products.invalidDate'));
       return;
     }
 
@@ -64,18 +86,18 @@ export default function AddProductPage() {
       name: String(trimmedName),
       expiryDate: String(expiryDateISO),
       quantity: Number(quantity) || 1,
-      category: category?.trim() || undefined,
+      categoryId: categoryId || undefined,
       location: location?.trim() || undefined,
     };
 
     // Walidacja przed wysłaniem
     if (!productData.name || productData.name.length === 0) {
-      toast.error('Product name is required');
+      toast.error(t('products.productNameRequired'));
       return;
     }
 
     if (!productData.expiryDate || productData.expiryDate.length === 0) {
-      toast.error('Expiry date is required');
+      toast.error(t('products.expiryDateRequired'));
       return;
     }
 
@@ -117,112 +139,175 @@ export default function AddProductPage() {
                   className="flex items-center space-x-2 text-fridge-primary hover:text-fridge-secondary transition-colors"
                 >
                   <span>←</span>
-                  <span>Back to Dashboard</span>
+                  <span>{t('common.back')}</span>
                 </Link>
               </div>
               <div className="flex items-center space-x-2">
                 <span className="text-2xl">🧊</span>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-fridge-primary to-fridge-secondary bg-clip-text text-transparent">
-                  Fridge App
+                  <h1 className="text-xl font-bold bg-gradient-to-r from-fridge-primary to-fridge-secondary bg-clip-text text-transparent">
+                  {t('common.appName')}
                 </h1>
               </div>
             </div>
           </div>
         </nav>
 
-        <main className="max-w-2xl mx-auto p-6">
-          <div className="bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-8 border-2 border-fridge-cold/30">
-            <div className="flex items-center space-x-3 mb-6">
-              <span className="text-3xl">➕</span>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-fridge-primary to-fridge-secondary bg-clip-text text-transparent">
-                Add Product
+        <main className="max-w-2xl mx-auto p-4 sm:p-6">
+          <div className="bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl p-6 border-2 border-fridge-cold/30">
+            <div className="flex items-center space-x-3 mb-4">
+              <span className="text-2xl">➕</span>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-fridge-primary to-fridge-secondary bg-clip-text text-transparent">
+                {t('products.addProduct')}
               </h1>
             </div>
           
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-fridge-dark mb-2">
-                Product Name *
+              <label className="block text-sm font-semibold text-fridge-dark mb-1.5">
+                {t('products.name')} *
               </label>
               <input
                 type="text"
                 required
                 placeholder="e.g., Milk, Bread, Eggs"
-                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all text-fridge-dark placeholder:text-gray-400"
+                className="w-full px-4 py-2 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all text-fridge-dark placeholder:text-gray-400"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-fridge-dark mb-2">
-                Expiry Date *
+              <label className="block text-sm font-semibold text-fridge-dark mb-1.5">
+                {t('products.expiryDate')} *
               </label>
               <input
                 type="date"
                 required
-                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all text-fridge-dark"
+                className="w-full px-4 py-2 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all text-fridge-dark"
                 value={expiryDate}
                 onChange={(e) => setExpiryDate(e.target.value)}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-fridge-dark mb-2">
-                Quantity
+              <label className="block text-sm font-semibold text-fridge-dark mb-1.5">
+                {t('products.quantity')}
               </label>
               <input
                 type="number"
                 min="1"
-                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all text-fridge-dark placeholder:text-gray-400"
+                className="w-full px-4 py-2 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all text-fridge-dark placeholder:text-gray-400"
                 value={quantity}
                 onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-fridge-dark mb-2">
-                Category
+              <label className="block text-sm font-semibold text-fridge-dark mb-1.5">
+                {t('products.category')}
               </label>
-              <input
-                type="text"
-                placeholder="e.g., Dairy, Meat, Vegetables"
-                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all text-fridge-dark placeholder:text-gray-400"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-              />
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <select
+                    className="flex-1 px-4 py-2 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all bg-white text-fridge-dark"
+                    value={categoryId}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === '__new__') {
+                        setShowNewCategoryInput(true);
+                        setCategoryId('');
+                      } else {
+                        setCategoryId(value);
+                        setShowNewCategoryInput(false);
+                      }
+                    }}
+                  >
+                    <option value="">{t('products.noCategory')}</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.icon && <span>{cat.icon} </span>}
+                        {cat.name}
+                      </option>
+                    ))}
+                    <option value="__new__">➕ {t('products.addNewCategory')}</option>
+                  </select>
+                </div>
+                
+                {showNewCategoryInput && (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder={t('products.categoryName')}
+                      className="flex-1 px-4 py-2 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all text-fridge-dark placeholder:text-gray-400"
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          if (newCategoryName.trim()) {
+                            createCategoryMutation.mutate({ name: newCategoryName.trim() });
+                          }
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (newCategoryName.trim()) {
+                          createCategoryMutation.mutate({ name: newCategoryName.trim() });
+                        }
+                      }}
+                      disabled={!newCategoryName.trim() || createCategoryMutation.isLoading}
+                      className="px-4 py-2 bg-fridge-primary text-white rounded-xl hover:bg-fridge-secondary disabled:opacity-50 transition-all font-semibold"
+                    >
+                      {createCategoryMutation.isLoading ? '⏳' : '✅'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowNewCategoryInput(false);
+                        setNewCategoryName('');
+                        setCategoryId('');
+                      }}
+                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all font-semibold"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-fridge-dark mb-2">
-                Location
+              <label className="block text-sm font-semibold text-fridge-dark mb-1.5">
+                {t('products.location')}
               </label>
               <select
-                className="w-full px-4 py-3 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all bg-white text-fridge-dark"
+                className="w-full px-4 py-2 border-2 border-fridge-cold rounded-xl focus:outline-none focus:ring-2 focus:ring-fridge-primary focus:border-fridge-primary transition-all bg-white text-fridge-dark"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
               >
-                <option value="">Select location</option>
-                <option value="fridge">🧊 Fridge</option>
-                <option value="freezer">❄️ Freezer</option>
-                <option value="pantry">📦 Pantry</option>
+                <option value="">{t('products.selectLocation')}</option>
+                <option value="fridge">{t('products.fridge')}</option>
+                <option value="freezer">{t('products.freezer')}</option>
+                <option value="pantry">{t('products.pantry')}</option>
               </select>
             </div>
 
-            <div className="flex space-x-4 pt-4">
+            <div className="flex space-x-4 pt-2">
               <button
                 type="submit"
                 disabled={createMutation.isLoading}
-                className="flex-1 bg-gradient-to-r from-fridge-primary to-fridge-secondary text-white py-3 px-6 rounded-xl hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fridge-primary disabled:opacity-50 transition-all font-semibold"
+                className="flex-1 bg-gradient-to-r from-fridge-primary to-fridge-secondary text-white py-2.5 px-6 rounded-xl hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fridge-primary disabled:opacity-50 transition-all font-semibold"
               >
-                {createMutation.isLoading ? '⏳ Adding...' : '✅ Add Product'}
+                {createMutation.isLoading ? `⏳ ${t('products.adding')}` : `✅ ${t('products.addProduct')}`}
               </button>
               <button
                 type="button"
                 onClick={() => router.push('/dashboard')}
-                className="flex-1 bg-fridge-light text-fridge-dark py-3 px-6 rounded-xl hover:bg-fridge-cold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fridge-primary transition-all font-semibold"
+                className="flex-1 bg-fridge-light text-fridge-dark py-2.5 px-6 rounded-xl hover:bg-fridge-cold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fridge-primary transition-all font-semibold"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
             </div>
           </form>
