@@ -46,6 +46,9 @@ model Category {
 model Product {
   id              String    @id @default(cuid())
   name            String
+  barcode         String?   // Kod kreskowy produktu (EAN/UPC) - dla szybkiego wyszukiwania
+  brand           String?   // Marka produktu
+  manufacturer    String?   // Nazwa firmy/producenta (z OpenFoodFacts)
   expiryDate      DateTime
   quantity        Int       @default(1)
   categoryId      String?   // Relacja do Category zamiast String
@@ -54,6 +57,16 @@ model Product {
   imageUrl        String?
   notes           String?
   
+  // Składniki i alergeny z OpenFoodFacts
+  ingredients     String?   // Lista składników (tekst)
+  allergens       String?   // Informacje o alergenach
+  
+  // Wartości odżywcze z OpenFoodFacts (jako JSON)
+  nutritionData   Json?     // { calories, protein, carbs, fat, fiber, sugars, salt }
+  
+  // Etykiety z OpenFoodFacts (np. "Bio", "Vegan", "Fair Trade")
+  labels          String[]  @default([])
+  
   userId          String
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   
@@ -61,8 +74,10 @@ model Product {
   updatedAt       DateTime  @updatedAt
   
   @@index([userId])
+  @@index([barcode]) // Indeks dla szybkiego wyszukiwania po kodzie kreskowym
   @@index([expiryDate])
   @@index([categoryId])
+  @@unique([userId, barcode]) // Użytkownik nie może mieć dwóch produktów z tym samym kodem kreskowym
   @@map("products")
 }
 

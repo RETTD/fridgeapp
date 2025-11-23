@@ -6,16 +6,18 @@ import Link from 'next/link';
 import { trpc } from '@/utils/trpc';
 import { Sidebar } from '@/components/Sidebar';
 import { HamburgerButton } from '@/components/HamburgerButton';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useTheme } from '@/components/ThemeProvider';
+import { formatLabel } from '@/utils/labelFormatter';
 
 export default function SearchPage() {
   const t = useTranslations();
+  const locale = useLocale();
   const { theme, toggleTheme, mounted: themeMounted } = useTheme();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'expiryDate' | 'createdAt' | 'name'>('expiryDate');
+  const [sortBy, setSortBy] = useState<'expiryDate' | 'createdAt' | 'name' | 'brand'>('expiryDate');
 
   // Search products with debounce
   const { data: products = [], isLoading } = trpc.products.list.useQuery(
@@ -132,6 +134,7 @@ export default function SearchPage() {
                   >
                     <option value="expiryDate">{t('search.sortByExpiry')}</option>
                     <option value="name">{t('search.sortByName')}</option>
+                    <option value="brand">{t('search.sortByBrand')}</option>
                     <option value="createdAt">{t('search.sortByDateAdded')}</option>
                   </select>
                 </div>
@@ -198,9 +201,17 @@ export default function SearchPage() {
                       }`}
                     >
                       <div className="flex justify-between items-start mb-3">
-                        <h3 className="text-lg font-bold text-fridge-dark dark:text-gray-200 flex-1">
-                          {product.name}
-                        </h3>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-bold text-fridge-dark dark:text-gray-200">
+                            {product.name}
+                          </h3>
+                          {product.brand && (
+                            <div className="mt-1 flex items-center space-x-2">
+                              <span className="text-xs font-semibold text-fridge-primary dark:text-fridge-primary/80">🏷️</span>
+                              <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">{product.brand}</span>
+                            </div>
+                          )}
+                        </div>
                         <button
                           onClick={() => handleDelete(product.id)}
                           className="text-red-500 hover:text-red-700 text-sm ml-2"
@@ -209,6 +220,20 @@ export default function SearchPage() {
                           🗑️
                         </button>
                       </div>
+
+                      {/* Etykiety z OpenFoodFacts */}
+                      {product.labels && product.labels.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {product.labels.map((label: string, idx: number) => (
+                            <span
+                              key={idx}
+                              className="px-2 py-0.5 bg-fridge-primary/20 text-fridge-primary dark:bg-fridge-primary/30 dark:text-fridge-primary rounded-full text-xs font-medium"
+                            >
+                              {formatLabel(label, locale)}
+                            </span>
+                          ))}
+                        </div>
+                      )}
 
                       {product.category && (
                         <div className="mb-2">
@@ -256,6 +281,43 @@ export default function SearchPage() {
                                 : '📦'}
                             </span>
                             <span className="text-fridge-dark dark:text-gray-300 capitalize">{product.location}</span>
+                          </div>
+                        )}
+
+                        {/* Wartości odżywcze */}
+                        {product.nutritionData && typeof product.nutritionData === 'object' && (
+                          <div className="mt-2 pt-2 border-t border-fridge-cold/30 dark:border-gray-700">
+                            <div className="text-xs font-semibold text-fridge-dark/80 dark:text-gray-400 mb-1">💪 {t('products.nutrition')}</div>
+                            <div className="grid grid-cols-2 gap-1 text-xs">
+                              {product.nutritionData.calories && (
+                                <div className="text-fridge-dark/70 dark:text-gray-400">
+                                  <span className="font-medium">{product.nutritionData.calories}</span> kcal
+                                </div>
+                              )}
+                              {product.nutritionData.protein && (
+                                <div className="text-fridge-dark/70 dark:text-gray-400">
+                                  <span className="font-medium">{product.nutritionData.protein}g</span> {t('products.protein')}
+                                </div>
+                              )}
+                              {product.nutritionData.carbs && (
+                                <div className="text-fridge-dark/70 dark:text-gray-400">
+                                  <span className="font-medium">{product.nutritionData.carbs}g</span> {t('products.carbs')}
+                                </div>
+                              )}
+                              {product.nutritionData.fat && (
+                                <div className="text-fridge-dark/70 dark:text-gray-400">
+                                  <span className="font-medium">{product.nutritionData.fat}g</span> {t('products.fat')}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Alergeny */}
+                        {product.allergens && (
+                          <div className="mt-2 pt-2 border-t border-fridge-cold/30 dark:border-gray-700">
+                            <div className="text-xs font-semibold text-red-600 dark:text-red-400 mb-1">⚠️ {t('products.allergens')}</div>
+                            <div className="text-xs text-red-600/80 dark:text-red-400/80">{product.allergens}</div>
                           </div>
                         )}
                       </div>

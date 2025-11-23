@@ -226,7 +226,12 @@ export default function RecipesPage() {
                         onChange={() => toggleProduct(product.id)}
                         className="w-4 h-4 text-fridge-primary rounded focus:ring-fridge-primary"
                       />
-                      <span className="text-primary flex-1">{product.name}</span>
+                      <div className="flex-1">
+                        <span className="text-primary block">{product.name}</span>
+                        {product.brand && (
+                          <span className="text-xs text-muted">{product.brand}</span>
+                        )}
+                      </div>
                       {product.category && (
                         <span className="text-sm text-muted">{product.category.name}</span>
                       )}
@@ -255,7 +260,12 @@ export default function RecipesPage() {
                       onChange={() => toggleProduct(product.id)}
                       className="w-4 h-4 text-fridge-primary rounded focus:ring-fridge-primary"
                     />
-                    <span className="text-primary flex-1">{product.name}</span>
+                    <div className="flex-1">
+                      <span className="text-primary block">{product.name}</span>
+                      {product.brand && (
+                        <span className="text-xs text-muted">{product.brand}</span>
+                      )}
+                    </div>
                     {product.category && (
                       <span className="text-sm text-muted">{product.category.name}</span>
                     )}

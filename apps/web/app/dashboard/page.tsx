@@ -8,18 +8,23 @@ import { supabase } from '@/utils/supabase';
 import toast from 'react-hot-toast';
 import { Sidebar } from '@/components/Sidebar';
 import { HamburgerButton } from '@/components/HamburgerButton';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useTheme } from '@/components/ThemeProvider';
+import { formatLabel, initializeLabelTranslations } from '@/utils/labelFormatter';
 
 export default function DashboardPage() {
   const router = useRouter();
   const t = useTranslations();
+  const locale = useLocale();
   const { theme, toggleTheme, mounted: themeMounted } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    // Inicjalizuj cache tłumaczeń tagów z OpenFoodFacts
+    initializeLabelTranslations();
+    
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         router.push('/auth/login');
@@ -288,9 +293,10 @@ export default function DashboardPage() {
               const isExpired = daysUntilExpiry < 0;
 
               return (
-                <div
+                <Link
                   key={product.id}
-                  className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all p-6 border-2 ${
+                  href={`/dashboard/products/${product.id}`}
+                  className={`block bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all p-6 border-2 cursor-pointer ${
                     isExpired
                       ? 'border-red-300 dark:border-red-700 bg-red-50/50 dark:bg-red-900/20'
                       : isExpiringSoon
@@ -299,13 +305,37 @@ export default function DashboardPage() {
                   }`}
                 >
                   <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-xl font-bold text-fridge-dark dark:text-gray-200 flex-1">{product.name}</h3>
-                    {product.location && (
-                      <span className="ml-2 px-2 py-1 bg-fridge-light text-fridge-dark text-xs rounded-full">
-                        {product.location}
-                      </span>
-                    )}
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-fridge-dark dark:text-gray-200">{product.name}</h3>
+                      {product.brand && (
+                        <div className="mt-1 flex items-center space-x-2">
+                          <span className="text-xs font-semibold text-fridge-primary dark:text-fridge-primary/80">🏷️</span>
+                          <span className="text-sm text-fridge-dark/70 dark:text-gray-400 font-medium">{product.brand}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      {product.location && (
+                        <span className="px-2 py-1 bg-fridge-light text-fridge-dark text-xs rounded-full">
+                          {product.location}
+                        </span>
+                      )}
+                    </div>
                   </div>
+
+                  {/* Etykiety z OpenFoodFacts */}
+                  {product.labels && product.labels.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {product.labels.map((label: string, idx: number) => (
+                        <span
+                          key={idx}
+                          className="px-2 py-1 bg-fridge-primary/20 text-fridge-primary dark:bg-fridge-primary/30 dark:text-fridge-primary rounded-full text-xs font-medium"
+                        >
+                          {formatLabel(label, locale)}
+                        </span>
+                      ))}
+                    </div>
+                  )}
 
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center space-x-2 text-sm">
@@ -334,15 +364,56 @@ export default function DashboardPage() {
                         <span>{product.category.icon && <span className="mr-1">{product.category.icon}</span>}{product.category.name}</span>
                       </div>
                     )}
+
+                    {/* Wartości odżywcze */}
+                    {product.nutritionData && typeof product.nutritionData === 'object' && (
+                      <div className="mt-3 pt-3 border-t border-fridge-cold/30 dark:border-gray-700">
+                        <div className="text-xs font-semibold text-fridge-dark/80 dark:text-gray-400 mb-2">💪 {t('products.nutrition')}</div>
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          {product.nutritionData.calories && (
+                            <div className="text-fridge-dark/70 dark:text-gray-400">
+                              <span className="font-medium">{product.nutritionData.calories}</span> kcal
+                            </div>
+                          )}
+                          {product.nutritionData.protein && (
+                            <div className="text-fridge-dark/70 dark:text-gray-400">
+                              <span className="font-medium">{product.nutritionData.protein}g</span> {t('products.protein')}
+                            </div>
+                          )}
+                          {product.nutritionData.carbs && (
+                            <div className="text-fridge-dark/70 dark:text-gray-400">
+                              <span className="font-medium">{product.nutritionData.carbs}g</span> {t('products.carbs')}
+                            </div>
+                          )}
+                          {product.nutritionData.fat && (
+                            <div className="text-fridge-dark/70 dark:text-gray-400">
+                              <span className="font-medium">{product.nutritionData.fat}g</span> {t('products.fat')}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Alergeny */}
+                    {product.allergens && (
+                      <div className="mt-2 pt-2 border-t border-fridge-cold/30 dark:border-gray-700">
+                        <div className="text-xs font-semibold text-red-600 dark:text-red-400 mb-1">⚠️ {t('products.allergens')}</div>
+                        <div className="text-xs text-red-600/80 dark:text-red-400/80">{product.allergens}</div>
+                      </div>
+                    )}
                   </div>
 
                   <button
-                    onClick={() => handleDelete(product.id)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDelete(product.id);
+                    }}
                     className="w-full mt-4 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium text-sm"
                   >
                     🗑️ {t('common.delete')}
                   </button>
-                </div>
+                </Link>
               );
             })}
           </div>

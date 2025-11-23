@@ -3,7 +3,8 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 
 export interface OpenFoodFactsProduct {
   name: string;
-  brand?: string;
+  brand?: string; // Marka produktu
+  manufacturer?: string; // Nazwa firmy/producenta
   barcode?: string;
   image?: string;
   ingredients?: string;
@@ -16,6 +17,8 @@ export interface OpenFoodFactsProduct {
     fiber?: number;
     sugars?: number;
     salt?: number;
+    servingSize?: string; // Rozmiar porcji (np. "100ml", "100g")
+    servingQuantity?: string; // Ilość porcji
     [key: string]: any;
   };
   labels?: string[];
@@ -252,18 +255,23 @@ function normalizeProductData(data: any): OpenFoodFactsProduct {
   return {
     name: product.product_name || product.name || product.product_name_en || '',
     brand: product.brands || product.brand,
+    manufacturer: product.manufacturers || product.manufacturer || product.manufacturing_places_tags?.[0] || product.manufacturing_places,
     barcode: product.code || product.barcode || product.ean,
     image: product.image_url || product.image,
     ingredients: product.ingredients_text || product.ingredients,
     allergens: product.allergens || product.allergens_tags?.join(', '),
     nutrition: {
-      calories: product.nutriments?.['energy-kcal_100g'] || product.nutriments?.['energy-kcal'],
-      protein: product.nutriments?.proteins_100g || product.nutriments?.proteins,
-      carbs: product.nutriments?.carbohydrates_100g || product.nutriments?.carbohydrates,
-      fat: product.nutriments?.fat_100g || product.nutriments?.fat,
-      fiber: product.nutriments?.fiber_100g || product.nutriments?.fiber,
-      sugars: product.nutriments?.sugars_100g || product.nutriments?.sugars,
-      salt: product.nutriments?.salt_100g || product.nutriments?.salt,
+      calories: product.nutriments?.['energy-kcal_100g'] || product.nutriments?.['energy-kcal_100ml'] || product.nutriments?.['energy-kcal'],
+      protein: product.nutriments?.proteins_100g || product.nutriments?.proteins_100ml || product.nutriments?.proteins,
+      carbs: product.nutriments?.carbohydrates_100g || product.nutriments?.carbohydrates_100ml || product.nutriments?.carbohydrates,
+      fat: product.nutriments?.fat_100g || product.nutriments?.fat_100ml || product.nutriments?.fat,
+      fiber: product.nutriments?.fiber_100g || product.nutriments?.fiber_100ml || product.nutriments?.fiber,
+      sugars: product.nutriments?.sugars_100g || product.nutriments?.sugars_100ml || product.nutriments?.sugars,
+      salt: product.nutriments?.salt_100g || product.nutriments?.salt_100ml || product.nutriments?.salt,
+      servingSize: product.serving_size || 
+        (product.nutriments?.['energy-kcal_100ml'] ? '100ml' : 
+         product.nutriments?.['energy-kcal_100g'] ? '100g' : undefined),
+      servingQuantity: product.serving_quantity,
       ...product.nutriments,
     },
     labels: product.labels_tags || product.labels || [],
