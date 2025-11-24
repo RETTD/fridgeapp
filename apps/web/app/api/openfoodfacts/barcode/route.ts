@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { getProductByBarcode } from '@/utils/mcp-openfoodfacts';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,9 +11,30 @@ const supabase = createClient(
  */
 async function fetchProductFromRESTAPI(barcode: string) {
   try {
-    const response = await fetch(
-      `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`
-    );
+    // Dodaj timeout (10 sekund) - jeśli nie odpowiada, zwróć null
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    
+    let response: Response;
+    try {
+      response = await fetch(
+        `https://world.openfoodfacts.org/api/v2/product/${barcode}.json`,
+        {
+          headers: {
+            'User-Agent': 'FridgeApp/1.0 (https://github.com/yourusername/fridge)',
+          },
+          signal: controller.signal,
+        }
+      );
+      clearTimeout(timeoutId);
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId);
+      if (fetchError.name === 'AbortError') {
+        console.warn('OpenFoodFacts API request timed out - returning null');
+        return null;
+      }
+      throw fetchError;
+    }
     
     if (!response.ok) {
       return null;
@@ -38,16 +58,40 @@ async function fetchProductFromRESTAPI(barcode: string) {
       ingredients: product.ingredients_text || '',
       allergens: product.allergens || '',
       nutrition: {
-        calories: product.nutriments?.['energy-kcal_100g'] || product.nutriments?.['energy-kcal_100ml'] || product.nutriments?.['energy-kcal'],
-        protein: product.nutriments?.proteins_100g || product.nutriments?.proteins_100ml || product.nutriments?.proteins,
-        carbs: product.nutriments?.carbohydrates_100g || product.nutriments?.carbohydrates_100ml || product.nutriments?.carbohydrates,
-        fat: product.nutriments?.fat_100g || product.nutriments?.fat_100ml || product.nutriments?.fat,
-        fiber: product.nutriments?.fiber_100g || product.nutriments?.fiber_100ml || product.nutriments?.fiber,
-        sugars: product.nutriments?.sugars_100g || product.nutriments?.sugars_100ml || product.nutriments?.sugars,
-        salt: product.nutriments?.salt_100g || product.nutriments?.salt_100ml || product.nutriments?.salt,
-        servingSize: product.serving_size || 
-          (product.nutriments?.['energy-kcal_100ml'] ? '100ml' : 
-           product.nutriments?.['energy-kcal_100g'] ? '100g' : undefined),
+        // Użyj wartości dla porcji (_serving) jeśli istnieją, w przeciwnym razie wartości na 100g/100ml
+        calories: product.nutriments?.['energy-kcal_serving'] ?? 
+                 product.nutriments?.['energy-kcal_100g'] ?? 
+                 product.nutriments?.['energy-kcal_100ml'] ?? 
+                 product.nutriments?.['energy-kcal'],
+        protein: product.nutriments?.proteins_serving ?? 
+                product.nutriments?.proteins_100g ?? 
+                product.nutriments?.proteins_100ml ?? 
+                product.nutriments?.proteins,
+        carbs: product.nutriments?.carbohydrates_serving ?? 
+              product.nutriments?.carbohydrates_100g ?? 
+              product.nutriments?.carbohydrates_100ml ?? 
+              product.nutriments?.carbohydrates,
+        fat: product.nutriments?.fat_serving ?? 
+            product.nutriments?.fat_100g ?? 
+            product.nutriments?.fat_100ml ?? 
+            product.nutriments?.fat,
+        fiber: product.nutriments?.fiber_serving ?? 
+              product.nutriments?.fiber_100g ?? 
+              product.nutriments?.fiber_100ml ?? 
+              product.nutriments?.fiber,
+        sugars: product.nutriments?.sugars_serving ?? 
+               product.nutriments?.sugars_100g ?? 
+               product.nutriments?.sugars_100ml ?? 
+               product.nutriments?.sugars,
+        salt: product.nutriments?.salt_serving ?? 
+             product.nutriments?.salt_100g ?? 
+             product.nutriments?.salt_100ml ?? 
+             product.nutriments?.salt,
+        servingSize: (product.nutriments?.['energy-kcal_serving'] !== undefined && product.serving_size) 
+          ? product.serving_size
+          : (product.serving_size || 
+            (product.nutriments?.['energy-kcal_100ml'] !== undefined ? '100ml' : 
+             product.nutriments?.['energy-kcal_100g'] !== undefined ? '100g' : undefined)),
         servingQuantity: product.serving_quantity,
       },
       labels: product.labels_tags || [],
@@ -96,47 +140,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Sprawdź czy MCP Open Food Facts jest skonfigurowany
-    const mcpPath = process.env.MCP_OPENFOODFACTS_PATH;
-    const useMCP = !!mcpPath;
-    
-    console.log('MCP Open Food Facts config check:');
-    console.log('- MCP_OPENFOODFACTS_PATH:', mcpPath || 'NOT SET');
-    console.log('- useMCP:', useMCP);
-    
-    let product = null;
-    
-    if (useMCP) {
-      // Pobierz produkt z MCP Open Food Facts
-      try {
-        console.log('Attempting to fetch product from MCP Open Food Facts...');
-        product = await getProductByBarcode(barcode);
-        console.log('MCP returned product:', !!product);
-      } catch (mcpError: any) {
-        console.error('MCP Open Food Facts error:', mcpError);
-        console.error('Error message:', mcpError.message);
-        console.error('Error stack:', mcpError.stack);
-        
-        // Sprawdź czy to błąd konfiguracji MCP
-        if (mcpError.message?.includes('MCP_OPENFOODFACTS_PATH')) {
-          return NextResponse.json(
-            { 
-              error: 'MCP Open Food Facts is not configured',
-              details: mcpError.message
-            },
-            { status: 500 }
-          );
-        }
-        
-        // Jeśli MCP nie działa, fallback do REST API
-        console.log('MCP failed, falling back to REST API');
-        product = await fetchProductFromRESTAPI(barcode);
-      }
-    } else {
-      // Użyj REST API bezpośrednio
-      console.log('MCP not configured, using REST API');
-      product = await fetchProductFromRESTAPI(barcode);
-    }
+    // Użyj REST API bezpośrednio (MCP może powodować timeouty)
+    console.log('Fetching product from OpenFoodFacts REST API');
+    const product = await fetchProductFromRESTAPI(barcode);
 
     if (!product) {
       return NextResponse.json(

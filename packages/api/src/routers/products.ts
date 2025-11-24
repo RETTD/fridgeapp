@@ -383,13 +383,13 @@ export const productsRouter = router({
   // Get product by barcode from Open Food Facts
   getByBarcode: protectedProcedure
     .input(z.object({ barcode: z.string().min(1) }))
-    .mutation(async ({ ctx, input }) => {
-      // Wywołaj REST API Open Food Facts bezpośrednio (prostsze i bardziej niezawodne)
+    .mutation(async ({ ctx, input }): Promise<any | null> => {
+      // Wywołaj REST API Open Food Facts bezpośrednio
       try {
-        const url = `https://world.openfoodfacts.org/api/v0/product/${encodeURIComponent(input.barcode)}.json`;
+        const url = `https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(input.barcode)}.json`;
         console.log(`Fetching product from Open Food Facts REST API: ${url}`);
         
-        // Dodaj timeout (10 sekund)
+        // Dodaj timeout (10 sekund) - jeśli nie odpowiada, zwróć null
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000);
         
@@ -397,16 +397,17 @@ export const productsRouter = router({
         try {
           response = await fetch(url, {
             method: 'GET',
+            headers: {
+              'User-Agent': 'FridgeApp/1.0 (https://github.com/yourusername/fridge)',
+            },
             signal: controller.signal,
           });
           clearTimeout(timeoutId);
         } catch (fetchError: any) {
           clearTimeout(timeoutId);
           if (fetchError.name === 'AbortError') {
-            throw new TRPCError({
-              code: 'TIMEOUT',
-              message: 'Request to Open Food Facts API timed out',
-            });
+            console.warn('OpenFoodFacts API request timed out - returning null');
+            return null; // Zwróć null zamiast rzucać błąd
           }
           throw fetchError;
         }
@@ -414,19 +415,15 @@ export const productsRouter = router({
         console.log(`Response status: ${response.status}`);
 
         if (!response.ok) {
-          throw new TRPCError({
-            code: 'INTERNAL_SERVER_ERROR',
-            message: `Failed to fetch product from Open Food Facts (HTTP ${response.status})`,
-          });
+          console.warn(`OpenFoodFacts API returned HTTP ${response.status} - returning null`);
+          return null; // Zwróć null zamiast rzucać błąd
         }
 
         const data = await response.json() as { status: number; product?: any };
         
         if (data.status !== 1 || !data.product) {
-          throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'Product not found in Open Food Facts',
-          });
+          console.warn('Product not found in OpenFoodFacts - returning null');
+          return null; // Zwróć null zamiast rzucać błąd
         }
 
         const product = data.product;
@@ -441,16 +438,42 @@ export const productsRouter = router({
           ingredients: product.ingredients_text || '',
           allergens: product.allergens || '',
           nutrition: {
-            calories: product.nutriments?.['energy-kcal_100g'] || product.nutriments?.['energy-kcal_100ml'] || product.nutriments?.['energy-kcal'],
-            protein: product.nutriments?.proteins_100g || product.nutriments?.proteins_100ml || product.nutriments?.proteins,
-            carbs: product.nutriments?.carbohydrates_100g || product.nutriments?.carbohydrates_100ml || product.nutriments?.carbohydrates,
-            fat: product.nutriments?.fat_100g || product.nutriments?.fat_100ml || product.nutriments?.fat,
-            fiber: product.nutriments?.fiber_100g || product.nutriments?.fiber_100ml || product.nutriments?.fiber,
-            sugars: product.nutriments?.sugars_100g || product.nutriments?.sugars_100ml || product.nutriments?.sugars,
-            salt: product.nutriments?.salt_100g || product.nutriments?.salt_100ml || product.nutriments?.salt,
-            servingSize: product.serving_size || 
-              (product.nutriments?.['energy-kcal_100ml'] ? '100ml' : 
-               product.nutriments?.['energy-kcal_100g'] ? '100g' : undefined),
+            // Użyj wartości dla porcji (_serving) jeśli istnieją, w przeciwnym razie wartości na 100g/100ml
+            calories: product.nutriments?.['energy-kcal_serving'] ?? 
+                     product.nutriments?.['energy-kcal_100g'] ?? 
+                     product.nutriments?.['energy-kcal_100ml'] ?? 
+                     product.nutriments?.['energy-kcal'],
+            protein: product.nutriments?.proteins_serving ?? 
+                    product.nutriments?.proteins_100g ?? 
+                    product.nutriments?.proteins_100ml ?? 
+                    product.nutriments?.proteins,
+            carbs: product.nutriments?.carbohydrates_serving ?? 
+                  product.nutriments?.carbohydrates_100g ?? 
+                  product.nutriments?.carbohydrates_100ml ?? 
+                  product.nutriments?.carbohydrates,
+            fat: product.nutriments?.fat_serving ?? 
+                product.nutriments?.fat_100g ?? 
+                product.nutriments?.fat_100ml ?? 
+                product.nutriments?.fat,
+            fiber: product.nutriments?.fiber_serving ?? 
+                  product.nutriments?.fiber_100g ?? 
+                  product.nutriments?.fiber_100ml ?? 
+                  product.nutriments?.fiber,
+            sugars: product.nutriments?.sugars_serving ?? 
+                   product.nutriments?.sugars_100g ?? 
+                   product.nutriments?.sugars_100ml ?? 
+                   product.nutriments?.sugars,
+            salt: product.nutriments?.salt_serving ?? 
+                 product.nutriments?.salt_100g ?? 
+                 product.nutriments?.salt_100ml ?? 
+                 product.nutriments?.salt,
+            // servingSize - jeśli mamy wartości _serving, użyj serving_size z produktu
+            // W przeciwnym razie użyj 100g/100ml w zależności od dostępnych danych
+            servingSize: (product.nutriments?.['energy-kcal_serving'] !== undefined && product.serving_size) 
+              ? product.serving_size
+              : (product.serving_size || 
+                (product.nutriments?.['energy-kcal_100ml'] !== undefined ? '100ml' : 
+                 product.nutriments?.['energy-kcal_100g'] !== undefined ? '100g' : undefined)),
             servingQuantity: product.serving_quantity,
           },
           labels: product.labels_tags || [],
@@ -460,17 +483,9 @@ export const productsRouter = router({
         console.log('Product fetched successfully:', !!normalizedProduct.name);
         return normalizedProduct;
       } catch (error) {
-        if (error instanceof TRPCError) {
-          throw error;
-        }
-        
-        console.error('Error fetching product by barcode:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: `Failed to fetch product from Open Food Facts: ${errorMessage}`,
-          cause: error,
-        });
+        // W przypadku innych błędów, zwróć null zamiast rzucać błąd
+        console.error('Error fetching product from OpenFoodFacts:', error);
+        return null;
       }
     }),
 });

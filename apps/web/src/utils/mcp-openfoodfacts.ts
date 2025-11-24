@@ -261,16 +261,40 @@ function normalizeProductData(data: any): OpenFoodFactsProduct {
     ingredients: product.ingredients_text || product.ingredients,
     allergens: product.allergens || product.allergens_tags?.join(', '),
     nutrition: {
-      calories: product.nutriments?.['energy-kcal_100g'] || product.nutriments?.['energy-kcal_100ml'] || product.nutriments?.['energy-kcal'],
-      protein: product.nutriments?.proteins_100g || product.nutriments?.proteins_100ml || product.nutriments?.proteins,
-      carbs: product.nutriments?.carbohydrates_100g || product.nutriments?.carbohydrates_100ml || product.nutriments?.carbohydrates,
-      fat: product.nutriments?.fat_100g || product.nutriments?.fat_100ml || product.nutriments?.fat,
-      fiber: product.nutriments?.fiber_100g || product.nutriments?.fiber_100ml || product.nutriments?.fiber,
-      sugars: product.nutriments?.sugars_100g || product.nutriments?.sugars_100ml || product.nutriments?.sugars,
-      salt: product.nutriments?.salt_100g || product.nutriments?.salt_100ml || product.nutriments?.salt,
-      servingSize: product.serving_size || 
-        (product.nutriments?.['energy-kcal_100ml'] ? '100ml' : 
-         product.nutriments?.['energy-kcal_100g'] ? '100g' : undefined),
+      // Użyj wartości dla porcji (_serving) jeśli istnieją, w przeciwnym razie wartości na 100g/100ml
+      calories: product.nutriments?.['energy-kcal_serving'] ?? 
+               product.nutriments?.['energy-kcal_100g'] ?? 
+               product.nutriments?.['energy-kcal_100ml'] ?? 
+               product.nutriments?.['energy-kcal'],
+      protein: product.nutriments?.proteins_serving ?? 
+              product.nutriments?.proteins_100g ?? 
+              product.nutriments?.proteins_100ml ?? 
+              product.nutriments?.proteins,
+      carbs: product.nutriments?.carbohydrates_serving ?? 
+            product.nutriments?.carbohydrates_100g ?? 
+            product.nutriments?.carbohydrates_100ml ?? 
+            product.nutriments?.carbohydrates,
+      fat: product.nutriments?.fat_serving ?? 
+          product.nutriments?.fat_100g ?? 
+          product.nutriments?.fat_100ml ?? 
+          product.nutriments?.fat,
+      fiber: product.nutriments?.fiber_serving ?? 
+            product.nutriments?.fiber_100g ?? 
+            product.nutriments?.fiber_100ml ?? 
+            product.nutriments?.fiber,
+      sugars: product.nutriments?.sugars_serving ?? 
+             product.nutriments?.sugars_100g ?? 
+             product.nutriments?.sugars_100ml ?? 
+             product.nutriments?.sugars,
+      salt: product.nutriments?.salt_serving ?? 
+           product.nutriments?.salt_100g ?? 
+           product.nutriments?.salt_100ml ?? 
+           product.nutriments?.salt,
+      servingSize: (product.nutriments?.['energy-kcal_serving'] !== undefined && product.serving_size) 
+        ? product.serving_size
+        : (product.serving_size || 
+          (product.nutriments?.['energy-kcal_100ml'] !== undefined ? '100ml' : 
+           product.nutriments?.['energy-kcal_100g'] !== undefined ? '100g' : undefined)),
       servingQuantity: product.serving_quantity,
       ...product.nutriments,
     },

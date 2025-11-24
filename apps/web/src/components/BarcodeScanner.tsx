@@ -83,7 +83,15 @@ export function BarcodeScanner({ onProductFound, onClose }: BarcodeScannerProps)
       }
     } catch (error: any) {
       console.error('Error scanning barcode:', error);
-      toast.error(error.message || 'Failed to scan barcode. Please try again with a clearer image.');
+      
+      // Obsługa różnych typów błędów
+      if (error.data?.code === 'TIMEOUT' || error.message?.includes('timeout') || error.message?.includes('408')) {
+        toast.error('Request timed out. OpenFoodFacts API is slow. Please try again.');
+      } else if (error.data?.code === 'NOT_FOUND') {
+        toast.error(`Product with barcode ${scannedBarcode || 'unknown'} not found in OpenFoodFacts database.`);
+      } else {
+        toast.error(error.message || 'Failed to scan barcode. Please try again.');
+      }
     } finally {
       setScanning(false);
     }

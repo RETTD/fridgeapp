@@ -25,6 +25,7 @@ export default function AddProductPage() {
   const [name, setName] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const [quantityUnit, setQuantityUnit] = useState<string>('szt');
   const [categoryId, setCategoryId] = useState<string>('');
   const [newCategoryName, setNewCategoryName] = useState('');
   const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);

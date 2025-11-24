@@ -50,7 +50,8 @@ model Product {
   brand           String?   // Marka produktu
   manufacturer    String?   // Nazwa firmy/producenta (z OpenFoodFacts)
   expiryDate      DateTime
-  quantity        Int       @default(1)
+  quantity        Float     @default(1) // Ilość produktu (może być ułamkowa, np. 0.5 kg, 250 ml)
+  quantityUnit    String?   @default("szt") // Jednostka miary: "szt", "g", "kg", "ml", "l", "opak", itp.
   categoryId      String?   // Relacja do Category zamiast String
   category        Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   location        String?   // "fridge", "freezer", "pantry"
