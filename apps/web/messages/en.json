@@ -95,7 +95,23 @@
     "deleteConfirm": "Are you sure you want to delete this product?",
     "quantityLabel": "Quantity",
     "categoryLabel": "Category",
-    "locationLabel": "Location"
+    "locationLabel": "Location",
+    "nutrition": "Nutrition",
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fat": "Fat",
+    "allergens": "Allergens",
+    "productDetails": "Product Details",
+    "productNotFound": "Product not found",
+    "barcode": "Barcode",
+    "brand": "Brand",
+    "manufacturer": "Manufacturer",
+    "notes": "Notes",
+    "notesPlaceholder": "Add any notes about this product...",
+    "editProduct": "Edit Product",
+    "updateProduct": "Update Product",
+    "updating": "Updating...",
+    "productUpdated": "Product updated successfully!"
   },
   "search": {
     "title": "Search Products",
@@ -110,6 +126,7 @@
     "enterProductName": "Enter a product name to search",
     "sortByExpiry": "Sort by Expiry",
     "sortByName": "Sort by Name",
+    "sortByBrand": "Sort by Brand",
     "sortByDateAdded": "Sort by Date Added"
   },
   "settings": {
